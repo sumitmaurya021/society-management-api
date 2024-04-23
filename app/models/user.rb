@@ -1,30 +1,19 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :otp_authenticatable, :database_authenticatable, :registerable,
+  devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
-
                 
-  attr_accessor :otp
-
 
   def self.authenticate(email, password)
    user = User.find_for_authentication(email: email)
    user&.valid_password?(password) ? user : nil
   end
 
-  def generate_otp
-    binding.pry
-    self.otp = rand(1000..9999).to_s.rjust(4, '0')
-    save
+  def send_reset_password_instructions
+    otp = generate_otp
+    update(reset_password_token: otp, reset_password_sent_at: Time.now)
+    UserMailer.with(user: self, otp: otp).reset_password_email.deliver_now
   end
 
-  def send_otp
-    UserMailer.otp_email(self).deliver_now
-  end
-
-
-  def verify_otp(input_otp)
-    otp == input_otp
-  end
 end

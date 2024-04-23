@@ -1,14 +1,17 @@
+<!-- app/views/user_mailer/otp_email.html.erb -->
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-         <h1>Your OTP for Login is: <%= @user.otp %></h1>
-    </body>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  <style>
+    /* Add your CSS styles here */
+  </style>
+</head>
+<body>
+  <h1>Your OTP for Login</h1>
+  <p>Hi <%= @user.name %>,</p>
+  <p>Your OTP for login is: <%= @otp %></p>
+  <p>Please use this OTP to log in to your account.</p>
+  <p>Thank you.</p>
+</body>
 </html>
