@@ -56,8 +56,8 @@ module Api
 
       # Verify OTP and login 
       def verify_otp_and_login
-        email = params.dig(:user, :email)
-        otp = params.dig(:user, :otp)
+        email = params[:user][:email]
+        otp = params[:user][:otp]
       
         user = User.find_by(email: email)
       
