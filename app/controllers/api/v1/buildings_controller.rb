@@ -5,59 +5,42 @@ module Api
   
         # POST /api/v1/buildings
         def create
-          if current_user.nil?
-            render json: { error: 'User not authenticated' }, status: :unauthorized
-            return
-          end
-          
           building = current_user.buildings.new(building_params)
           if building.save
             generate_blocks(building)
             render json: building, status: :created
           else
-            render json: building.errors, status: :unprocessable_entity
+            render json: { error: building.errors.full_messages.join(", ") }, status: :unprocessable_entity
           end
         end
   
         private
-  
-        def set_building
-          if current_user.nil?
-            render json: { error: 'User not authenticated' }, status: :unauthorized
-            return
-          end
-  
-          @building = current_user.buildings.find(params[:id])
-        rescue ActiveRecord::RecordNotFound
-          render json: { error: 'Building not found' }, status: :not_found
-        end
   
         def building_params
           params.require(:building).permit(:building_name, :building_address, :total_blocks, :number_of_floors, :ground_floor, :number_of_rooms_per_floor)
         end
   
         def generate_blocks(building)
-          (1..building.total_blocks).each do |block_number|
-            block_name = ("A".ord + block_number - 1).chr
+          building.total_blocks.times do |block_number|
+            block_name = ("A".ord + block_number).chr
             block = building.blocks.create(name: block_name)
-            generate_floors(block, building.ground_floor, building.number_of_floors)
+            generate_floors(block, building.number_of_floors, building.number_of_rooms_per_floor)
           end
         end
   
-        def generate_floors(block, ground_floor, number_of_floors)
-          start_floor = ground_floor ? 0 : 1
-          end_floor = number_of_floors
-          (start_floor..end_floor).each do |floor_number|
-            block.floors.create(number: floor_number)
-            generate_rooms(block, floor_number)
+        def generate_floors(block, number_of_floors, number_of_rooms_per_floor)
+          start_floor = block.building.ground_floor ? 0 : 1
+          (start_floor..number_of_floors).each do |floor_number|
+            floor = block.floors.create(number: floor_number)
+            generate_rooms(floor, number_of_rooms_per_floor)
           end
         end
         
-        def generate_rooms(block, floor_number)
-            binding.pry
-          return unless block.building && block.building.number_of_rooms_per_floor # Ensure block and number_of_rooms_per_floor are not nil
-          block.building.number_of_rooms_per_floor.times do |room_number|
-            block.rooms.create(floor_number: floor_number, room_number: room_number + 1)
+        def generate_rooms(floor, number_of_rooms_per_floor)
+          return unless number_of_rooms_per_floor
+          number_of_rooms_per_floor.times do |room_number|
+            room = floor.rooms.create(room_number: room_number + 1)
+            room.update(block_id: floor.block_id, floor_id: floor.id)
           end
         end
       end
