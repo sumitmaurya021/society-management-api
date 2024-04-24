@@ -2,7 +2,7 @@ module Api
   module V1
     class UsersController < ApplicationController
       # Skip authentication for certain actions
-      skip_before_action :doorkeeper_authorize!, only: %i[create login verify_and_generate_token]
+      skip_before_action :doorkeeper_authorize!, only: %i[create login verify_otp_and_login forgot_password reset_password]
 
       # User registration
       def create
@@ -40,36 +40,68 @@ module Api
         end
       end
 
+      # User login via email and password and Send OTP for verification
       def login
-        @user = User.find_by(email: params[:user][:email])
+        user = User.find_by(email: params[:user][:email])
       
-        if @user&.valid_password?(params[:user][:password])
-          binding.pry
-          if @user.generate_otp && @user.save # Ensure OTP is generated and saved
-            if @user.send_otp
-              render json: { message: 'OTP sent to your email. Please enter OTP to log in.' }, status: :ok
-            else
-              render_unauthorized_response('Failed to send OTP')
-            end
-          else
-            render_unauthorized_response('Failed to generate or save OTP')
-          end
+        if user&.valid_password?(params[:user][:password])
+          # Generate OTP and send to user's email
+          otp = generate_otp
+          send_otp_email(user, otp)
+          render json: { message: 'OTP sent to your email. Please enter it.', email: user.email }, status: :ok
         else
           render_unauthorized_response('Invalid email or password')
         end
       end
 
-      def verify_and_generate_token
-        @user = User.find_by(email: params[:user][:email])
+      # Verify OTP and login 
+      def verify_otp_and_login
+        email = params.dig(:user, :email)
+        otp = params.dig(:user, :otp)
       
-        if @user.present? && @user.verify_otp(params[:user][:otp])
+        user = User.find_by(email: email)
+      
+        if user && user.otp == otp
+          user.update(otp: nil) # Clear OTP
           client_app = Doorkeeper::Application.find_by(uid: params[:client_id])
-          access_token = create_access_token(@user, client_app)
-          render_login_response(access_token)
+          access_token = create_access_token(user, client_app)
+          render_login_response(user, access_token, 'Login successful')
         else
           render_unauthorized_response('Invalid OTP')
         end
       end
+
+
+      def forgot_password
+        user = User.find_by(email: params[:email])
+    
+        if user
+          otp = generate_otp
+          user.update(otp: otp)
+          UserMailer.with(user: user, otp: otp).reset_password_email.deliver_now
+          render json: { message: 'OTP sent to your email. Please enter it to reset your password.', email: user.email }, status: :ok
+        else
+          render_unauthorized_response('Invalid email address')
+        end
+      end
+
+
+      def reset_password
+        email = params[:user][:email]
+        otp = params[:user][:otp]
+        password = params[:password]
+      
+        user = User.find_by(email: email)
+      
+        if user && (user.otp.nil? || user.otp == otp)
+          user.update(password: password, otp: nil)
+          render json: { message: 'Password reset successful' }, status: :ok
+        else
+          render_unauthorized_response('Invalid OTP')
+        end
+      end
+      
+      
 
       private
 
@@ -117,11 +149,21 @@ module Api
       end
 
       # Render login response
-      def render_login_response(access_token)
-        render json: { user: @user, access_token: access_token.token, message: 'Login successful' }, status: :ok
+      def render_login_response(user, access_token, message)
+        render json: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            created_at: access_token.created_at.to_time.to_i,
+            access_token: access_token.token,
+          },
+          message: message
+        }, status: :ok
       end
 
-      # Prepare user response
+      # Render user response
       def user_response(user, access_token)
         {
           user: {
@@ -130,9 +172,20 @@ module Api
             email: user.email,
             role: user.role,
             created_at: access_token.created_at.to_time.to_i,
-            access_token: access_token.token,
+            access_token: access_token.token
           }
         }
+      end
+
+      # Send OTP to user's email
+      def send_otp_email(user, otp)
+        user.update(otp: otp)
+        UserMailer.with(user: user, otp: otp).otp_email.deliver_now
+      end
+
+      # Generate OTP
+      def generate_otp
+        rand(1000..9999).to_s.rjust(4, '0')
       end
     end
   end
