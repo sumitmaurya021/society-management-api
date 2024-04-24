@@ -7,6 +7,13 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :users
+      resources :buildings do
+        resources :blocks do
+          resources :floors do
+            resources :rooms
+          end
+        end
+      end
       
       post 'login', to: 'users#login'
       post 'logout', to: 'users#logout'

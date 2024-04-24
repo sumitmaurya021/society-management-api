@@ -4,6 +4,13 @@ module Api
       # Skip authentication for certain actions
       skip_before_action :doorkeeper_authorize!, only: %i[create login verify_otp_and_login forgot_password reset_password]
 
+
+      # show all user
+      def index
+        @user = User.all
+        render json: { user: @user, message: 'This is list of all user' }, status: :ok
+      end
+
       # User registration
       def create
         user = User.new(user_params)
@@ -102,7 +109,7 @@ module Api
       end
       
       
-
+ 
       private
 
       # Strong parameters for user
