@@ -17,6 +17,18 @@ module Api
           render json: { error: building.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end
       end
+
+      def maintenance_bills
+        building = current_user.buildings.find(params[:building_id])
+        maintenance_bills = building.maintenance_bills
+        render json: maintenance_bills
+      end
+
+      def water_bills
+        building = current_user.buildings.find(params[:building_id])
+        water_bills = building.water_bills
+        render json: water_bills
+      end
   
       private
   
