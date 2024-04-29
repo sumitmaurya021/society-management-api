@@ -1,4 +1,4 @@
-ActiveRecord::Schema[7.1].define(version: 2024_04_24_055925) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_26_045403) do
   enable_extension "plpgsql"
 
   create_table "blocks", force: :cascade do |t|
@@ -24,6 +24,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_24_055925) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["block_id"], name: "index_floors_on_block_id"
+  end
+
+  create_table "maintenance_bills", force: :cascade do |t|
+    t.string "your_name"
+    t.string "name"
+    t.decimal "amount"
+    t.date "start_date"
+    t.date "end_date"
+    t.text "remarks"
+    t.bigint "building_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["building_id"], name: "index_maintenance_bills_on_building_id"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|
@@ -94,11 +107,26 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_24_055925) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "water_bills", force: :cascade do |t|
+    t.string "your_name"
+    t.string "name"
+    t.decimal "amount"
+    t.date "start_date"
+    t.date "end_date"
+    t.text "remarks"
+    t.bigint "building_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["building_id"], name: "index_water_bills_on_building_id"
+  end
+
   add_foreign_key "blocks", "buildings"
   add_foreign_key "buildings", "users"
   add_foreign_key "floors", "blocks"
+  add_foreign_key "maintenance_bills", "buildings"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
+  add_foreign_key "water_bills", "buildings"
 end

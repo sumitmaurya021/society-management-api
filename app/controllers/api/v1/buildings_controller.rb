@@ -1,7 +1,7 @@
 module Api
   module V1
     class BuildingsController < ApplicationController
-      before_action :doorkeeper_authorize!
+      # before_action :doorkeeper_authorize!, only: [:index]
 
       def index
         @buildings = current_user.buildings
@@ -16,6 +16,18 @@ module Api
         else
           render json: { error: building.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end
+      end
+
+      def maintenance_bills
+        building = current_user.buildings.find(params[:building_id])
+        maintenance_bills = building.maintenance_bills
+        render json: maintenance_bills
+      end
+
+      def water_bills
+        building = current_user.buildings.find(params[:building_id])
+        water_bills = building.water_bills
+        render json: water_bills
       end
   
       private

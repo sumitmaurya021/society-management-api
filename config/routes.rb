@@ -13,7 +13,12 @@ Rails.application.routes.draw do
             resources :rooms
           end
         end
+        get 'maintenance_bills', to: 'buildings#maintenance_bills'
+        get 'water_bills', to: 'buildings#water_bills'
+        resources :maintenance_bills, only: [:create, :update]
+        resources :water_bills, only: [:create, :update]
       end
+
       
       post 'login', to: 'users#login'
       post 'logout', to: 'users#logout'
