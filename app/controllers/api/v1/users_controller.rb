@@ -2,7 +2,7 @@ module Api
   module V1
     class UsersController < ApplicationController
       # Skip authentication for certain actions
-      skip_before_action :doorkeeper_authorize!, only: %i[create login verify_otp_and_login forgot_password reset_password]
+      skip_before_action :doorkeeper_authorize!, only: %i[create login logout verify_otp_and_login forgot_password reset_password]
 
 
       # show all user
@@ -95,6 +95,7 @@ module Api
 
 
       def reset_password
+        
         email = params[:user][:email]
         otp = params[:user][:otp]
         password = params[:password]

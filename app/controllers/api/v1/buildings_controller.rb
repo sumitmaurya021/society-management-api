@@ -1,7 +1,7 @@
 module Api
   module V1
     class BuildingsController < ApplicationController
-      # before_action :doorkeeper_authorize!, only: [:index]
+      before_action :doorkeeper_authorize!, only: [:index]
 
       def index
         @buildings = current_user.buildings
