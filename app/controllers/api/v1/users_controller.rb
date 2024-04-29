@@ -35,8 +35,9 @@ module Api
 
       # User logout
       def logout
-        if params[:access_token].present?
-          current_token = Doorkeeper::AccessToken.find_by(token: params[:access_token])
+        if request.headers['Authorization'].present?
+          token = request.headers['Authorization'].split(' ').last
+          current_token = Doorkeeper::AccessToken.find_by(token: token)
           if current_token
             render_logout_response(current_token.destroy)
           else
