@@ -3,7 +3,7 @@ module Api
     module V1
       class MaintenanceBillsController < ApplicationController
         before_action :doorkeeper_authorize!
-        before_action :set_maintenance_bill, only: [:update]
+        before_action :set_maintenance_bill, only: [:update, :show]
 
         def index
           building = current_user.buildings.find(params[:building_id])
