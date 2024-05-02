@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       post 'verify_otp_and_login', to: 'users#verify_otp_and_login'
       post 'forgot_password', to: 'users#forgot_password'
       post 'reset_password', to: 'users#reset_password'
+      get 'dashboard', to: 'dashboards#dashboard'
     end
   end
 end
