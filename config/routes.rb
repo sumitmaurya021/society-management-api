@@ -19,7 +19,7 @@ Rails.application.routes.draw do
         resources :water_bills, only: [:create, :update, :index]
       end
 
-      
+      resources :dashboards, only: [:index]
       post 'login', to: 'users#login'
       post 'logout', to: 'users#logout'
       post 'verify_otp_and_login', to: 'users#verify_otp_and_login'

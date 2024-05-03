@@ -19,4 +19,7 @@ class User < ApplicationRecord
     UserMailer.with(user: self, otp: otp).reset_password_email.deliver_now
   end
 
+  scope :admins, -> { where(role: 'admin') }
+  scope :regular, -> { where(role: 'customer') }
+
 end
