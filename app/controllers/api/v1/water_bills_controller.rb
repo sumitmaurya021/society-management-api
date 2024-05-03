@@ -31,7 +31,7 @@ module Api
         end
   
         def water_bill_params
-          params.require(:water_bill).permit(:your_name, :name, :amount, :start_date, :end_date, :remarks)
+          params.require(:water_bill).permit(:bill_name, :owner_amount, :rent_amount, :start_date, :end_date, :remarks, :bill_month_and_year)
         end
       end
     end

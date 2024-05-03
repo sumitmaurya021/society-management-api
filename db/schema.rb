@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_26_045403) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,15 +40,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_26_045403) do
   end
 
   create_table "maintenance_bills", force: :cascade do |t|
-    t.string "your_name"
-    t.string "name"
-    t.decimal "amount"
     t.date "start_date"
     t.date "end_date"
     t.text "remarks"
     t.bigint "building_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "bill_name"
+    t.string "bill_month_and_year"
+    t.decimal "owner_amount"
+    t.decimal "rent_amount"
     t.index ["building_id"], name: "index_maintenance_bills_on_building_id"
   end
 
@@ -121,15 +122,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_26_045403) do
   end
 
   create_table "water_bills", force: :cascade do |t|
-    t.string "your_name"
-    t.string "name"
-    t.decimal "amount"
     t.date "start_date"
     t.date "end_date"
     t.text "remarks"
     t.bigint "building_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "bill_name"
+    t.string "bill_month_and_year"
+    t.decimal "owner_amount"
+    t.decimal "rent_amount"
     t.index ["building_id"], name: "index_water_bills_on_building_id"
   end
 
