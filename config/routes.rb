@@ -20,12 +20,17 @@ Rails.application.routes.draw do
       end
 
       resources :dashboards, only: [:index]
+      post 'login_by_customer', to: 'users#login_by_customer'
       post 'login', to: 'users#login'
       post 'logout', to: 'users#logout'
       post 'verify_otp_and_login', to: 'users#verify_otp_and_login'
       post 'forgot_password', to: 'users#forgot_password'
       post 'reset_password', to: 'users#reset_password'
       get 'dashboard', to: 'dashboards#dashboard'
+      post 'reset_password_for_customer', to: 'users#reset_password_for_customer'
+      post 'forgot_password_for_customer', to: 'users#forgot_password_for_customer'
+      post 'accept_user', to: 'users#accept_user'
+      post 'reject_user', to: 'users#reject_user'
     end
   end
 end
