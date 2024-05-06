@@ -3,13 +3,17 @@ module Api
   module V1
     class UsersController < ApplicationController
       # Skip authentication for certain actions
-      skip_before_action :doorkeeper_authorize!, only: %i[create login logout verify_otp_and_login forgot_password reset_password]
+      skip_before_action :doorkeeper_authorize!, only: %i[index create login logout verify_otp_and_login forgot_password reset_password login_by_customer reset_password_for_customer forgot_password_for_customer] 
 
 
-      # show all user
+      # show only customer user list
       def index
-        @user = User.all
-        render json: { user: @user, message: 'This is list of all user' }, status: :ok
+        if current_user.role == 'admin'
+          @users = User.where(role: 'customer')
+        render json: { users: @users, message: 'This is list of all users'  }, status: :ok
+        else
+          render json: { error: 'You are not authorized to access this resource' }, status: :unauthorized
+        end
       end
 
       # User registration
@@ -80,7 +84,6 @@ module Api
         end
       end
 
-
       def forgot_password
         user = User.find_by(email: params[:email])
     
@@ -94,6 +97,17 @@ module Api
         end
       end
 
+      def forgot_password_for_customer
+        user = User.find_by(email: params[:email])
+        if user
+          otp = generate_otp
+          user.update(otp: otp)
+          UserMailer.with(user: user, otp: otp).reset_password_email_for_customer.deliver_now
+          render json: { message: 'OTP sent to your email. Please enter it to reset your password.', email: user.email }, status: :ok
+        else
+          render_unauthorized_response('Invalid email address')
+        end
+      end
 
       def reset_password
         
@@ -110,6 +124,75 @@ module Api
           render_unauthorized_response('Invalid OTP')
         end
       end
+
+      def reset_password_for_customer
+        block_name = params[:block_name]
+        room_number = params[:user][:room_number]
+        otp = params[:user][:otp]
+        password = params[:password]
+
+        block = Block.find_by(name: block_name)
+        user = User.find_by(block_id: block.id, room_number: room_number)
+
+        if user && (user.otp.nil? || user.otp == otp)
+          user.update(password: password, otp: nil)
+          render json: { message: 'Password reset successful' }, status: :ok
+        else
+          render_unauthorized_response('Invalid OTP')
+        end
+      end
+      
+
+      def login_by_customer
+        block_name = params[:user][:block_name]
+        room_number = params[:user][:room_number]
+        password = params[:user][:password]
+      
+        # Find block by name
+        block = Block.find_by(name: block_name)
+        return render_unauthorized_response('Invalid block name') unless block
+        
+        # Find user by block and room number
+        user = User.find_by(block_id: block.id, room_number: room_number)
+      
+        if user
+          if user.valid_password?(password)
+            # Generate access token
+            client_app = Doorkeeper::Application.find_by(uid: params[:client_id])
+            access_token = create_access_token(user, client_app)
+            
+            # Render successful response
+            render_login_response(user, access_token, 'Login successful')
+          else
+            puts "Invalid password"
+            render_unauthorized_response('Invalid password')
+          end
+        else
+          puts "User not found"
+          render_unauthorized_response('Invalid block, room number, or password')
+        end
+      end
+
+      def accept_user
+        user = User.find_by(id: params[:id])
+        return render_unauthorized_response('User not found') unless user
+        return render_unauthorized_response('User is already accepted') if user.status == 'success'
+
+        user.update(status: 'accepted')
+        UserMailer.accept_user_email(user).deliver_now
+        render json: { message: 'User accepted successfully', user: user }, status: :ok
+      end
+
+      # Reject user
+      def reject_user
+        user = User.find_by(id: params[:id])
+        return render_unauthorized_response('User not found') unless user
+        return render_unauthorized_response('User is already rejected') if user.status == 'rejected'
+
+        user.update(status: 'rejected')
+        UserMailer.reject_user_email(user).deliver_now
+        render json: { message: 'User rejected successfully', user: user }, status: :ok
+      end
       
       
  
@@ -117,7 +200,12 @@ module Api
 
       # Strong parameters for user
       def user_params
-        params.require(:user).permit(:email, :password, :name, :role, :otp)
+        if params[:user][:role] == 'admin'
+          params.require(:user).permit(:email, :password, :name, :role, :otp)
+        else
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :owner_or_renter, :room_id, :block_id, :floor_id, :room_number)
+          
+        end
       end
 
       # Find current user
@@ -166,6 +254,13 @@ module Api
             name: user.name,
             email: user.email,
             role: user.role,
+            mobile_number: user.mobile_number,
+            owner_or_renter: user.owner_or_renter,
+            room_id: user.room_id,
+            block_id: user.block_id,
+            floor_id: user.floor_id,
+            room_number: user.room_number,
+            status: user.status,
             created_at: access_token.created_at.to_time.to_i,
             access_token: access_token.token,
           },

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_06_100602) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -50,6 +50,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
     t.string "bill_month_and_year"
     t.decimal "owner_amount"
     t.decimal "rent_amount"
+    t.string "status", default: "pending"
     t.index ["building_id"], name: "index_maintenance_bills_on_building_id"
   end
 
@@ -111,13 +112,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.string "role", default: "customer"
     t.string "name"
     t.string "password"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "otp"
+    t.string "mobile_number"
+    t.bigint "block_id"
+    t.bigint "floor_id"
+    t.integer "room_number", default: 0
+    t.integer "owner_or_renter", default: 0
+    t.integer "role", default: 0
+    t.bigint "room_id"
+    t.string "status", default: "pending"
+    t.index ["block_id"], name: "index_users_on_block_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["floor_id"], name: "index_users_on_floor_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
@@ -132,6 +142,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
     t.string "bill_month_and_year"
     t.decimal "owner_amount"
     t.decimal "rent_amount"
+    t.string "status", default: "pending"
     t.index ["building_id"], name: "index_water_bills_on_building_id"
   end
 
@@ -143,5 +154,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_02_054126) do
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
+  add_foreign_key "users", "blocks"
+  add_foreign_key "users", "floors"
   add_foreign_key "water_bills", "buildings"
 end
