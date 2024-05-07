@@ -3,7 +3,7 @@ module Api
     module V1
       class MaintenanceBillsController < ApplicationController
         before_action :doorkeeper_authorize!
-        before_action :set_maintenance_bill, only: [:update]
+        before_action :set_maintenance_bill, only: [:update , :destroy]
 
         def index
           building = current_user.buildings.find(params[:building_id])
@@ -29,6 +29,11 @@ module Api
           end
         end
 
+        def destroy
+          @maintenance_bill.destroy
+          render json: { message: 'Maintenance bill deleted successfully' }, status: :ok
+        end
+
         private
 
         def set_maintenance_bill
@@ -36,7 +41,7 @@ module Api
         end
 
         def maintenance_bill_params
-          params.require(:maintenance_bill).permit(:bill_name, :owner_amount, :rent_amount, :bill_month_and_year, :start_date, :end_date, :remarks)
+          params.require(:maintenance_bill).permit(:bill_name, :owner_amount, :rent_amount, :bill_month_and_year, :start_date, :end_date, :remarks, :payment_mode)
         end
       end
     end
