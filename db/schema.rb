@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_06_100602) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_07_113831) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -51,6 +51,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_06_100602) do
     t.decimal "owner_amount"
     t.decimal "rent_amount"
     t.string "status", default: "pending"
+    t.integer "payment_mode"
     t.index ["building_id"], name: "index_maintenance_bills_on_building_id"
   end
 
@@ -125,6 +126,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_06_100602) do
     t.integer "role", default: 0
     t.bigint "room_id"
     t.string "status", default: "pending"
+    t.string "gender"
     t.index ["block_id"], name: "index_users_on_block_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["floor_id"], name: "index_users_on_floor_id"
@@ -143,6 +145,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_06_100602) do
     t.decimal "owner_amount"
     t.decimal "rent_amount"
     t.string "status", default: "pending"
+    t.integer "payment_mode"
     t.index ["building_id"], name: "index_water_bills_on_building_id"
   end
 

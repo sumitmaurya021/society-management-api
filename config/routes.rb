@@ -15,8 +15,8 @@ Rails.application.routes.draw do
         end
         get 'maintenance_bills', to: 'buildings#maintenance_bills'
         get 'water_bills', to: 'buildings#water_bills'
-        resources :maintenance_bills, only: [:create, :update, :index]
-        resources :water_bills, only: [:create, :update, :index]
+        resources :maintenance_bills, only: [:create, :update, :index, :destroy]
+        resources :water_bills, only: [:create, :update, :index, :destroy]
       end
 
       resources :dashboards, only: [:index]

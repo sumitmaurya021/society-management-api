@@ -9,12 +9,32 @@ module Api
       # show only customer user list
       def index
         if current_user.role == 'admin'
-          @users = User.where(role: 'customer')
-        render json: { users: @users, message: 'This is list of all users'  }, status: :ok
+          @users = User.where(role: 'customer').map do |user|
+            {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password: user.password,
+              created_at: user.created_at,
+              updated_at: user.updated_at,
+              otp: user.otp,
+              mobile_number: user.mobile_number,
+              block: Block.find(user.block_id).name,
+              floor_id: user.floor_id,
+              room_number: user.room_number,
+              owner_or_renter: user.owner_or_renter,
+              role: user.role,
+              room_id: user.room_id,
+              status: user.status,
+              gender: user.gender
+            }
+          end
+          render json: { users: @users, message: 'This is list of all users' }, status: :ok
         else
           render json: { error: 'You are not authorized to access this resource' }, status: :unauthorized
         end
       end
+      
 
       # User registration
       def create
@@ -203,7 +223,7 @@ module Api
         if params[:user][:role] == 'admin'
           params.require(:user).permit(:email, :password, :name, :role, :otp)
         else
-          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :owner_or_renter, :room_id, :block_id, :floor_id, :room_number)
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :owner_or_renter, :room_id, :block_id, :floor_id, :room_number, :gender)
           
         end
       end
@@ -248,6 +268,7 @@ module Api
 
       # Render login response
       def render_login_response(user, access_token, message)
+        # block_name = Block.find(user.block_id).name
         render json: {
           user: {
             id: user.id,
@@ -258,6 +279,7 @@ module Api
             owner_or_renter: user.owner_or_renter,
             room_id: user.room_id,
             block_id: user.block_id,
+            # block_name: block_name,
             floor_id: user.floor_id,
             room_number: user.room_number,
             status: user.status,
