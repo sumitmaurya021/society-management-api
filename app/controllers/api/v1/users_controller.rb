@@ -20,6 +20,8 @@ module Api
               otp: user.otp,
               mobile_number: user.mobile_number,
               block: Block.find(user.block_id).name,
+              floor: Floor.find(user.floor_id).number,
+              room: Room.find(user.room_id).room_number,
               floor_id: user.floor_id,
               room_number: user.room_number,
               owner_or_renter: user.owner_or_renter,
@@ -164,6 +166,7 @@ module Api
       
 
       def login_by_customer
+        binding.pry
         block_name = params[:user][:block_name]
         room_number = params[:user][:room_number]
         password = params[:user][:password]
