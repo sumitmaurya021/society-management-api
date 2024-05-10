@@ -8,7 +8,16 @@ module Api
         def index
           building = current_user.buildings.find(params[:building_id])
           maintenance_bills = building.maintenance_bills
-          render json: maintenance_bills
+          render json: { water_bills: maintenance_bills, message: 'This is list of all maintenance bills' }, status: :ok
+        end
+
+        def get_maintenance_bills
+          if current_user.status == "accepted"
+            @maintenance_bill = MaintenanceBill.all
+            render json: { maintenance_bills: @maintenance_bill, user: current_user }, status: :ok
+          else
+            render json: { error: "Only approved users can view maintenance bills" }, status: :forbidden
+          end
         end
         
         def create
