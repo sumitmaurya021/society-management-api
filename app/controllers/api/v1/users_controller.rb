@@ -166,7 +166,6 @@ module Api
       
 
       def login_by_customer
-        binding.pry
         block_name = params[:user][:block_name]
         room_number = params[:user][:room_number]
         password = params[:user][:password]

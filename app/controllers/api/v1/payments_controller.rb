@@ -2,19 +2,20 @@
 module Api
     module V1
       class PaymentsController < ApplicationController
-        before_action :doorkeeper_authorize!
+        before_action :doorkeeper_authorize! 
         before_action :set_building
         before_action :set_maintenance_bill
         before_action :set_payment, only: [:update, :destroy, :accept]
 
         def index
-          payment = @maintenance_bill.payments
-          render json: { payments: payment, message: 'This is list of all payments' }, status: :ok
+          @payments = @maintenance_bill.payments
+          render json: { payments: @payments, message: 'This is list of all payments' }, status: :ok
         end
-  
+
         def create
           payment = @maintenance_bill.payments.new(payment_params)
           payment.status = 'pending'
+          payment.user_id = current_user.id
           if payment.save
             render json: payment, status: :created
           else
@@ -23,9 +24,9 @@ module Api
         end
 
         def accept
-            binding.pry
             if @payment
               if @payment.update(status: "paid")
+                PaymentMailer.payment_success_email(@payment.user).deliver_now
                 render json: @payment, status: :ok
               else
                 render json: { error: @payment.errors.full_messages }, status: :unprocessable_entity
@@ -34,6 +35,7 @@ module Api
               render json: { error: "Payment not found" }, status: :not_found
             end
           end
+
   
         def update
           if @payment.update(payment_params)
@@ -63,12 +65,14 @@ module Api
         end
   
         def set_payment
-            return unless @maintenance_bill
-            @payment = @maintenance_bill.payments.find_by(id: params[:id])
-          end
+          return unless @maintenance_bill
+  
+          @payment = @maintenance_bill.payments.find_by(id: params[:payment_id])
+          render json: { error: "Payment not found" }, status: :not_found unless @payment
+        end
   
         def payment_params
-          params.require(:payment).permit(:month_year, :bill_name, :block, :floor, :room_number, :amount, :payment_method, :status, :payment_id)
+          params.require(:payment).permit(:month_year, :bill_name, :block, :floor, :room_number, :amount, :payment_method, :status, :payment_id, :user_id)
         end
       end
     end
