@@ -15,10 +15,15 @@ Rails.application.routes.draw do
         end
         get 'maintenance_bills', to: 'buildings#maintenance_bills'
         get 'water_bills', to: 'buildings#water_bills'
-        resources :maintenance_bills, only: [:create, :update, :index, :destroy]
+        resources :maintenance_bills do
+          resources :payments, only: [:create, :update, :destroy, :index] do
+            post 'accept', to: 'payments#accept'
+          end
+        end
         resources :water_bills, only: [:create, :update, :index, :destroy]
       end
 
+      get 'get_maintenance_bills', to: 'maintenance_bills#get_maintenance_bills'
       resources :dashboards, only: [:index]
       post 'login_by_customer', to: 'users#login_by_customer'
       post 'login', to: 'users#login'

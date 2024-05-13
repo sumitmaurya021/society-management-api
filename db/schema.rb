@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_10_114443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,8 +40,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
   end
 
   create_table "maintenance_bills", force: :cascade do |t|
-    t.bigint "room_id", null: false
-    t.bigint "building_id", null: false
     t.string "bill_name"
     t.string "bill_month_and_year"
     t.decimal "owner_amount"
@@ -49,10 +47,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
     t.date "start_date"
     t.date "end_date"
     t.text "remarks"
+    t.bigint "building_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["building_id"], name: "index_maintenance_bills_on_building_id"
-    t.index ["room_id"], name: "index_maintenance_bills_on_room_id"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|
@@ -97,6 +95,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.date "month_year"
+    t.string "bill_name"
+    t.string "block"
+    t.integer "floor"
+    t.string "room_number"
+    t.decimal "amount"
+    t.string "payment_method"
+    t.string "payment_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "maintenance_bill_id", null: false
+    t.integer "status"
+    t.index ["maintenance_bill_id"], name: "index_payments_on_maintenance_bill_id"
+  end
+
   create_table "rooms", force: :cascade do |t|
     t.integer "room_number"
     t.bigint "floor_id", null: false
@@ -134,8 +148,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
   end
 
   create_table "water_bills", force: :cascade do |t|
-    t.bigint "room_id", null: false
-    t.bigint "building_id", null: false
     t.string "bill_name"
     t.string "bill_month_and_year"
     t.decimal "owner_amount"
@@ -143,23 +155,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_110101) do
     t.date "start_date"
     t.date "end_date"
     t.text "remarks"
+    t.bigint "building_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["building_id"], name: "index_water_bills_on_building_id"
-    t.index ["room_id"], name: "index_water_bills_on_room_id"
   end
 
   add_foreign_key "blocks", "buildings"
   add_foreign_key "buildings", "users"
   add_foreign_key "floors", "blocks"
   add_foreign_key "maintenance_bills", "buildings"
-  add_foreign_key "maintenance_bills", "rooms"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "payments", "maintenance_bills"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
   add_foreign_key "users", "blocks"
   add_foreign_key "users", "floors"
   add_foreign_key "water_bills", "buildings"
-  add_foreign_key "water_bills", "rooms"
 end

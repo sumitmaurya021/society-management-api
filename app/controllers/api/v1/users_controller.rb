@@ -218,7 +218,6 @@ module Api
       end
       
       
- 
       private
 
       # Strong parameters for user
