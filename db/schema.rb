@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_13_062851) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_14_092749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,7 +103,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_13_062851) do
     t.string "room_number"
     t.decimal "amount"
     t.string "payment_method"
-    t.string "payment_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "maintenance_bill_id", null: false
