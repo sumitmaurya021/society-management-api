@@ -17,6 +17,7 @@ class User < ApplicationRecord
   validates :block_id, :floor_id, :room_id, :status, presence: true, if: :customer?
 
   has_many :buildings, dependent: :destroy
+  has_many :payments, dependent: :destroy
 
   def self.authenticate(email, password)
     user = User.find_for_authentication(email: email)
