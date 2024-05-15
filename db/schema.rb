@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_14_092749) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_15_121645) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -105,10 +105,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_14_092749) do
     t.string "payment_method"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "maintenance_bill_id", null: false
+    t.bigint "maintenance_bill_id"
     t.integer "status"
     t.bigint "user_id", null: false
+    t.bigint "water_bill_id"
     t.index ["maintenance_bill_id"], name: "index_payments_on_maintenance_bill_id"
+    t.index ["water_bill_id"], name: "index_payments_on_water_bill_id"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -117,6 +119,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_14_092749) do
     t.bigint "block_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "total_units"
+    t.float "unit_rate"
+    t.float "previous_unit"
+    t.float "updated_unit"
     t.index ["block_id"], name: "index_rooms_on_block_id"
     t.index ["floor_id"], name: "index_rooms_on_floor_id"
   end
@@ -168,6 +174,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_14_092749) do
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "payments", "maintenance_bills"
+  add_foreign_key "payments", "water_bills"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
   add_foreign_key "users", "blocks"

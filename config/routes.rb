@@ -10,7 +10,9 @@ Rails.application.routes.draw do
       resources :buildings do
         resources :blocks do
           resources :floors do
-            resources :rooms
+            resources :rooms do
+              post 'update_units', to: 'water_bills#update_units'
+            end
           end
         end
         get 'maintenance_bills', to: 'buildings#maintenance_bills'
@@ -23,6 +25,7 @@ Rails.application.routes.draw do
         resources :water_bills, only: [:create, :update, :index, :destroy]
       end
 
+      get 'get_water_bills', to: 'water_bills#get_water_bills'
       get 'get_maintenance_bills', to: 'maintenance_bills#get_maintenance_bills'
       resources :dashboards, only: [:index]
       post 'login_by_customer', to: 'users#login_by_customer'

@@ -82,7 +82,13 @@ module Api
         end
   
         def payment_params
-          params.require(:payment).permit(:month_year, :bill_name,:amount, :payment_method, :status, :payment_id, :user_id)
+          permitted_params = params.require(:payment).permit(:month_year, :bill_name, :block, :floor, :room_number, :amount, :payment_method)
+        
+          # Permit maintenance_bill_id and water_bill_id only if they are present in the request
+          permitted_params[:maintenance_bill_id] = params[:payment][:maintenance_bill_id] if params[:payment][:maintenance_bill_id].present?
+          permitted_params[:water_bill_id] = params[:payment][:water_bill_id] if params[:payment][:water_bill_id].present?
+        
+          permitted_params
         end
       end
     end
