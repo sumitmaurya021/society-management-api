@@ -21,6 +21,9 @@ module Api
           end
         end
 
+        
+
+
         def update
           if @water_bill.update(water_bill_params)
             render json: @water_bill, status: :ok
@@ -43,6 +46,7 @@ module Api
         def water_bill_params
           params.require(:water_bill).permit(:bill_name, :owner_amount, :rent_amount, :start_date, :end_date, :remarks, :bill_month_and_year)
         end
+
       end
     end
   end

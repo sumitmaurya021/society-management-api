@@ -215,7 +215,8 @@ module Api
         UserMailer.reject_user_email(user).deliver_now
         render json: { message: 'User rejected successfully', user: user }, status: :ok
       end
-      
+
+  
       
       private
 

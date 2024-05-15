@@ -15,7 +15,13 @@ module Api
         def create
           payment = @maintenance_bill.payments.new(payment_params)
           payment.status = 'pending'
+        
+          # Extract user-related attributes from current_user
+          payment.block = current_user.block_id
+          payment.floor = current_user.floor_id
+          payment.room_number = current_user.room_number
           payment.user_id = current_user.id
+        
           if payment.save
             render json: payment, status: :created
           else
@@ -24,6 +30,7 @@ module Api
         end
 
         def accept
+          if current_user.role == "admin"
             if @payment
               if @payment.update(status: "paid")
                 PaymentMailer.payment_success_email(@payment.user).deliver_now
@@ -34,7 +41,10 @@ module Api
             else
               render json: { error: "Payment not found" }, status: :not_found
             end
+          else
+            render json: { error: "Only admin can accept payments" }, status: :forbidden
           end
+        end
 
   
         def update
@@ -72,7 +82,7 @@ module Api
         end
   
         def payment_params
-          params.require(:payment).permit(:month_year, :bill_name, :block, :floor, :room_number, :amount, :payment_method, :status, :payment_id, :user_id)
+          params.require(:payment).permit(:month_year, :bill_name,:amount, :payment_method, :status, :payment_id, :user_id)
         end
       end
     end
