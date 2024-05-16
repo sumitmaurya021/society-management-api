@@ -10,6 +10,15 @@ module Api
           water_bills = building.water_bills
           render json: { water_bills: water_bills, message: 'This is list of all water bills' }, status: :ok
         end
+
+        def get_water_bills
+          if current_user.status == "accepted" || current_user.role == "admin"
+            @water_bill = WaterBill.all
+            render json: { water_bills: @water_bill, user: current_user }, status: :ok
+          else
+            render json: { error: "Only approved users can view water bills" }, status: :forbidden
+          end
+        end
         
         def create
           building = current_user.buildings.find(params[:building_id])
@@ -21,8 +30,37 @@ module Api
           end
         end
 
+        def update_units
+          building = Building.find(params[:building_id])
+          block = building.blocks.find(params[:block_id])
+          floor = block.floors.find(params[:floor_id])
+          rooms = floor.rooms
         
-
+          unit_rate = params[:water_bill][:unit_rate].to_f
+          previous_unit = params[:water_bill][:previous_unit].to_f
+        
+          total_units = 0
+        
+          params[:water_bill][:room_units].each do |room_id, updated_unit|
+            room = rooms.find_by(id: room_id)
+            next unless room
+        
+            updated_unit = updated_unit.to_f
+            difference = updated_unit + previous_unit
+            units_consumed = difference * unit_rate
+        
+            room.total_units ||= 0
+            room.total_units += units_consumed
+        
+            room.update(unit_rate: unit_rate, previous_unit: previous_unit, updated_unit: updated_unit)
+        
+            room.save
+        
+            total_units += room.total_units
+          end
+        
+          render json: { message: "Units updated successfully", total_units: total_units }, status: :ok
+        end
 
         def update
           if @water_bill.update(water_bill_params)
