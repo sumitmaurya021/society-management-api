@@ -30,6 +30,42 @@ module Api
         water_bills = building.water_bills
         render json: water_bills
       end
+
+      def building_info
+        building_id = params[:building_id]
+        block_id = params[:block_id]
+        floor_id = params[:floor_id]
+  
+        
+        if building_id.present?
+          building = Building.find(building_id)
+          if block_id.present?
+            block = building.blocks.find(block_id)
+            if floor_id.present?
+              floor = block.floors.find(floor_id)
+              rooms = floor.rooms
+            else
+              rooms = block.floors.includes(:rooms).map(&:rooms).flatten
+            end
+          else
+            blocks = building.blocks.includes(:floors => :rooms)
+          end
+        else
+          buildings = Building.includes(:blocks => [:floors => :rooms])
+        end
+
+    
+        response_data = {
+          buildings: buildings,
+          blocks: blocks,
+          floors: floors,
+          rooms: rooms
+        }.compact
+    
+        render json: response_data, status: :ok
+      end
+    end
+
   
       private
   
@@ -67,4 +103,3 @@ module Api
       end
     end
   end
-end

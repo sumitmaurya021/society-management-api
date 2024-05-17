@@ -25,6 +25,7 @@ Rails.application.routes.draw do
         resources :water_bills, only: [:create, :update, :index, :destroy]
       end
 
+      get '/building_info', to: 'buildings#building_info'
       get 'get_water_bills', to: 'water_bills#get_water_bills'
       get 'get_maintenance_bills', to: 'maintenance_bills#get_maintenance_bills'
       resources :dashboards, only: [:index]
