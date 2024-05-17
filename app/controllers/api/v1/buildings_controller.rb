@@ -8,6 +8,11 @@ module Api
         @buildings = current_user.buildings
         render json: { buildings: @buildings, message: 'This is list of all buildings' }, status: :ok
       end
+
+      def show
+        @building = current_user.buildings.find(params[:id])
+        render json: @building, status: :ok
+      end
   
       def create
         building = current_user.buildings.new(building_params)
@@ -30,60 +35,6 @@ module Api
         water_bills = building.water_bills
         render json: water_bills
       end
-
-      def building_info
-        building_id = params[:building_id]
-        block_id = params[:block_id]
-        floor_id = params[:floor_id]
-    
-        buildings = nil
-        blocks = nil
-        floors_with_rooms = nil
-        rooms = nil
-    
-        if building_id.present?
-          building = Building.find(building_id)
-          if block_id.present?
-            block = building.blocks.find(block_id)
-            if floor_id.present?
-              floor = block.floors.find(floor_id)
-              rooms = floor.rooms
-            else
-              floors_with_rooms = block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
-            end
-          else
-            blocks = building.blocks.includes(:floors => :rooms).map do |block|
-              {
-                block: block,
-                floors: block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
-              }
-            end
-          end
-        else
-          buildings = Building.includes(:blocks => { :floors => :rooms }).map do |building|
-            {
-              building: building,
-              blocks: building.blocks.includes(:floors => :rooms).map do |block|
-                {
-                  block: block,
-                  floors: block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
-                }
-              end
-            }
-          end
-        end
-    
-        response_data = {
-          buildings: buildings,
-          blocks: blocks,
-          floors_with_rooms: floors_with_rooms,
-          rooms: rooms
-        }.compact
-    
-        render json: response_data, status: :ok
-      end
-    end
-
   
       private
   
@@ -121,3 +72,4 @@ module Api
       end
     end
   end
+end
