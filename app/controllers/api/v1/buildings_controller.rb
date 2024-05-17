@@ -35,8 +35,12 @@ module Api
         building_id = params[:building_id]
         block_id = params[:block_id]
         floor_id = params[:floor_id]
-  
-        
+    
+        buildings = nil
+        blocks = nil
+        floors_with_rooms = nil
+        rooms = nil
+    
         if building_id.present?
           building = Building.find(building_id)
           if block_id.present?
@@ -45,20 +49,34 @@ module Api
               floor = block.floors.find(floor_id)
               rooms = floor.rooms
             else
-              rooms = block.floors.includes(:rooms).map(&:rooms).flatten
+              floors_with_rooms = block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
             end
           else
-            blocks = building.blocks.includes(:floors => :rooms)
+            blocks = building.blocks.includes(:floors => :rooms).map do |block|
+              {
+                block: block,
+                floors: block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
+              }
+            end
           end
         else
-          buildings = Building.includes(:blocks => [:floors => :rooms])
+          buildings = Building.includes(:blocks => { :floors => :rooms }).map do |building|
+            {
+              building: building,
+              blocks: building.blocks.includes(:floors => :rooms).map do |block|
+                {
+                  block: block,
+                  floors: block.floors.includes(:rooms).map { |floor| { floor: floor, rooms: floor.rooms } }
+                }
+              end
+            }
+          end
         end
-
     
         response_data = {
           buildings: buildings,
           blocks: blocks,
-          floors: floors,
+          floors_with_rooms: floors_with_rooms,
           rooms: rooms
         }.compact
     
