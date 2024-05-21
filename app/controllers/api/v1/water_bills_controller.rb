@@ -36,7 +36,8 @@ module Api
           floor = block.floors.find(params[:floor_id])
           rooms = floor.rooms
         
-          unit_rate = params[:water_bill][:unit_rate].to_f
+          water_bill = WaterBill.find(params[:water_bill_id])
+          unit_rate = water_bill.unit_rate.to_f
           previous_unit = params[:water_bill][:previous_unit].to_f
         
           total_units = 0
@@ -62,6 +63,7 @@ module Api
           render json: { message: "Units updated successfully", total_units: total_units }, status: :ok
         end
 
+
         def update
           if @water_bill.update(water_bill_params)
             render json: @water_bill, status: :ok
@@ -82,7 +84,7 @@ module Api
         end
   
         def water_bill_params
-          params.require(:water_bill).permit(:bill_name, :owner_amount, :rent_amount, :start_date, :end_date, :remarks, :bill_month_and_year)
+          params.require(:water_bill).permit(:bill_name, :unit_rate, :start_date, :end_date, :remarks, :bill_month_and_year)
         end
 
       end
