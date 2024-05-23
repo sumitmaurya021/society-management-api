@@ -42,18 +42,18 @@ module Api
         
           total_units = 0
         
-          params[:water_bill][:room_units].each do |room_id, updated_unit|
+          params[:water_bill][:room_units].each do |room_id, current_unit|
             room = rooms.find_by(id: room_id)
             next unless room
         
-            updated_unit = updated_unit.to_f
-            difference = updated_unit + previous_unit
+            current_unit = current_unit.to_f
+            difference = current_unit + previous_unit
             units_consumed = difference * unit_rate
         
             room.total_units ||= 0
             room.total_units += units_consumed
         
-            room.update(unit_rate: unit_rate, previous_unit: previous_unit, updated_unit: updated_unit)
+            room.update(unit_rate: unit_rate, previous_unit: previous_unit, updated_unit: current_unit, current_unit: 0)
         
             room.save
         
@@ -62,6 +62,7 @@ module Api
         
           render json: { message: "Units updated successfully", total_units: total_units }, status: :ok
         end
+        
 
 
         def update

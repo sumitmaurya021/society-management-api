@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_21_093143) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_22_113914) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -123,6 +123,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_21_093143) do
     t.float "unit_rate"
     t.float "previous_unit"
     t.float "updated_unit"
+    t.float "current_unit"
     t.index ["block_id"], name: "index_rooms_on_block_id"
     t.index ["floor_id"], name: "index_rooms_on_floor_id"
   end
