@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_22_113914) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_23_060506) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -154,6 +154,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_22_113914) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "water_bill_payments", force: :cascade do |t|
+    t.date "month_year"
+    t.string "bill_name"
+    t.string "block"
+    t.integer "floor"
+    t.integer "room_number"
+    t.decimal "amount"
+    t.string "payment_method"
+    t.bigint "user_id", null: false
+    t.bigint "water_bill_id", null: false
+    t.integer "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_water_bill_payments_on_user_id"
+    t.index ["water_bill_id"], name: "index_water_bill_payments_on_water_bill_id"
+  end
+
   create_table "water_bills", force: :cascade do |t|
     t.string "bill_name"
     t.string "bill_month_and_year"
@@ -179,5 +196,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_22_113914) do
   add_foreign_key "rooms", "floors"
   add_foreign_key "users", "blocks"
   add_foreign_key "users", "floors"
+  add_foreign_key "water_bill_payments", "users"
+  add_foreign_key "water_bill_payments", "water_bills"
   add_foreign_key "water_bills", "buildings"
 end
