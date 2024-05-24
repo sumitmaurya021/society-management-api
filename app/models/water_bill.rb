@@ -1,4 +1,4 @@
 class WaterBill < ApplicationRecord
   belongs_to :building
-  has_many :payments
+  has_many :water_bill_payments
 end

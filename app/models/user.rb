@@ -18,6 +18,7 @@ class User < ApplicationRecord
 
   has_many :buildings, dependent: :destroy
   has_many :payments, dependent: :destroy
+  has_many :water_bill_payments, dependent: :destroy
 
   def self.authenticate(email, password)
     user = User.find_for_authentication(email: email)

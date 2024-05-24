@@ -14,11 +14,13 @@ module Api
         def get_water_bills
           if current_user.status == "accepted" || current_user.role == "admin"
             @water_bill = WaterBill.all
-            render json: { water_bills: @water_bill, user: current_user }, status: :ok
+            user_room_info = current_user.room.attributes.slice("room_number", "total_units", "unit_rate", "previous_unit", "updated_unit", "current_unit")
+            render json: { water_bills: @water_bill, user: current_user, user_room: user_room_info }, status: :ok
           else
             render json: { error: "Only approved users can view water bills" }, status: :forbidden
           end
         end
+        
         
         def create
           building = current_user.buildings.find(params[:building_id])
