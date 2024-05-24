@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+
+  mount ActionCable.server => '/cable'
+
   devise_for :users
   use_doorkeeper do
     skip_controllers :authorizations, :applications, :authorized_applications
@@ -6,7 +9,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :users
+      resources :users do
+        resources :notifications, only: [:index, :show, :create]
+      end
       resources :buildings do
         resources :blocks do
           resources :floors do
@@ -29,6 +34,7 @@ Rails.application.routes.draw do
         end
       end
 
+      get "notifications", to: "notifications#index"
       get 'get_water_bills', to: 'water_bills#get_water_bills'
       get 'get_maintenance_bills', to: 'maintenance_bills#get_maintenance_bills'
       resources :dashboards, only: [:index]

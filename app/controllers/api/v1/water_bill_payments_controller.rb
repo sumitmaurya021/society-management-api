@@ -36,7 +36,7 @@ module Api
             amount: amount,
             payment_method: params[:payment_method],
             user_id: current_user.id,
-            status: :pending
+            status: "pending"
           )
   
           if payment.save

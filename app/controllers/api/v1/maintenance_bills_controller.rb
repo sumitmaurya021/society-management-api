@@ -16,7 +16,7 @@ module Api
             @maintenance_bill = MaintenanceBill.all
             render json: { maintenance_bills: @maintenance_bill, user: current_user }, status: :ok
           else
-            render json: { error: "Only approved users can view maintenance bills" }, status: :forbidden
+            render json: { error: "Only accepted users can view maintenance bills" }, status: :forbidden
           end
         end
         
