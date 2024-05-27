@@ -37,6 +37,13 @@ module Api
         end
       end
       
+      def update
+        if @user.update(user_params)
+          render json: { message: 'User updated successfully' }, status: :ok
+        else
+          render json: { error: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
 
       # User registration
       def create

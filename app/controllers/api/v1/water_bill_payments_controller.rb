@@ -1,12 +1,17 @@
 module Api
     module V1
       class WaterBillPaymentsController < ApplicationController
-        before_action :doorkeeper_authorize!
+        skip_before_action :doorkeeper_authorize!, only: [:generate_invoice_pdf]
         before_action :set_water_bill
   
         def index
           water_bill_payments = @water_bill.water_bill_payments
           render json: { water_bill_payments: water_bill_payments }, status: :ok
+        end
+
+        def show
+          @payment = @water_bill.water_bill_payments.find_by(id: params[:id])
+          render json: { payment: @payment }, status: :ok
         end
   
         def create
@@ -70,6 +75,31 @@ module Api
             render json: { error: @payment.errors.full_messages }, status: :unprocessable_entity
           end
         end
+
+        def generate_invoice_pdf
+
+          @water_bill_payment = WaterBillPayment.find_by(id: params[:water_bill_id])
+          unless @water_bill_payment
+            render json: { error: "WaterBillPayment not found" }, status: :not_found
+            return
+          end         
+          
+          respond_to do |format|
+            format.html
+            format.pdf do
+              render pdf: "Water_Analysis_Invoice",
+                     template: "water_bill_payments/water_pdf",
+                     page_size: "A4",
+                     locals: {
+                       payment: @water_bill_payment
+                       
+                       
+                     }
+            end
+          end
+        end
+        
+        
   
         private
   
