@@ -35,16 +35,13 @@ module Api
       end
 
       def send_notification_to_all_users(notification)
-        User.find_each do |user|
-          user.notifications.create(title: notification.title, message: notification.message)
-          ActionCable.server.broadcast("NotificationChannel",   {
-            id: notification.id,
-            title: notification.title,
-            message: notification.message,
-            read: notification.read,
-            created_at: notification.created_at.strftime("%Y-%m-%d %H:%M:%S")
-          })
-        end
+        ActionCable.server.broadcast("NotificationChannel", {
+          id: notification.id,
+          title: notification.title,
+          message: notification.message,
+          read: notification.read,
+          created_at: notification.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        })
       end
     end
   end

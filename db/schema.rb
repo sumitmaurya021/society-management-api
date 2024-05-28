@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_24_091358) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_27_090856) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -118,9 +118,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_24_091358) do
     t.bigint "maintenance_bill_id"
     t.integer "status"
     t.bigint "user_id", null: false
-    t.bigint "water_bill_id"
     t.index ["maintenance_bill_id"], name: "index_payments_on_maintenance_bill_id"
-    t.index ["water_bill_id"], name: "index_payments_on_water_bill_id"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -202,7 +200,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_24_091358) do
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "payments", "maintenance_bills"
-  add_foreign_key "payments", "water_bills"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
   add_foreign_key "users", "blocks"
