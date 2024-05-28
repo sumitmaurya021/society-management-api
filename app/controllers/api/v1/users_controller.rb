@@ -223,6 +223,15 @@ module Api
         render json: { message: 'User rejected successfully', user: user }, status: :ok
       end
 
+      def update
+        @user = User.find_by(id: params[:id])
+        if @user.update(user_params)
+          render json: { message: 'User updated successfully' }, status: :ok
+        else
+          render json: { error: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
   
       
       private
@@ -292,6 +301,7 @@ module Api
             floor_id: user.floor_id,
             room_number: user.room_number,
             status: user.status,
+            gender: user.gender,
             created_at: access_token.created_at.to_time.to_i,
             access_token: access_token.token,
           },

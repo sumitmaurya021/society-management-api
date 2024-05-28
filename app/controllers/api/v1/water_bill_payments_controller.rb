@@ -3,6 +3,7 @@ module Api
       class WaterBillPaymentsController < ApplicationController
         skip_before_action :doorkeeper_authorize!, only: [:generate_invoice_pdf]
         before_action :set_water_bill
+        before_action :set_water_bill_payment, only: [:generate_invoice_pdf]
   
         def index
           water_bill_payments = @water_bill.water_bill_payments
@@ -69,34 +70,28 @@ module Api
           end
   
           if @payment.update(status: "Paid")
-            PaymentMailer.payment_accepted_email(@payment.user).deliver_now
+            
+            binding.pry
+            
+            PaymentMailer.payment_accepted_email(@payment).deliver_now
             render json: { message: "Payment accepted successfully", payment: @payment }, status: :ok
           else
             render json: { error: @payment.errors.full_messages }, status: :unprocessable_entity
           end
         end
 
-        def generate_invoice_pdf
+        def generate_invoice_pdf     
 
-          @water_bill_payment = WaterBillPayment.find_by(id: params[:water_bill_id])
-          unless @water_bill_payment
-            render json: { error: "WaterBillPayment not found" }, status: :not_found
-            return
-          end         
-          
-          respond_to do |format|
-            format.html
-            format.pdf do
-              render pdf: "Water_Analysis_Invoice",
-                     template: "water_bill_payments/water_pdf",
-                     page_size: "A4",
-                     locals: {
-                       payment: @water_bill_payment
-                       
-                       
-                     }
-            end
-          end
+          pdf = WickedPdf.new.pdf_from_string(
+            render_to_string(
+              template: 'invoices/water_pdf',
+              layout: 'pdf', 
+              locals: { payment: @water_bill_payment },
+              dpi: 300
+            ),
+          )
+
+          send_data pdf, filename: 'Water_Analysis_Invoice.pdf', type: 'application/pdf'
         end
         
         
@@ -107,6 +102,13 @@ module Api
           @water_bill = WaterBill.find_by(id: params[:water_bill_id])
           render json: { error: "Water bill not found" }, status: :not_found unless @water_bill
         end
+
+        def set_water_bill_payment
+          @water_bill_payment = WaterBillPayment.find_by(id: params[:water_bill_id])
+          render json: { error: "WaterBillPayment not found" }, status: :not_found unless @water_bill_payment
+        end
+
+
       end
     end
   end
