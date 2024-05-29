@@ -9,7 +9,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :users do
+      resources :users, only: [:index, :show, :update, :destroy] do
         resources :notifications, only: [:index, :show, :create]
       end
       resources :buildings do
@@ -27,10 +27,10 @@ Rails.application.routes.draw do
             post 'accept', to: 'payments#accept'
           end
         end
-        resources :water_bills do
+        resources :water_bills, only: [:create, :update, :destroy, :index] do
           resources :water_bill_payments, only: [:create, :update, :destroy, :index, :show] do
             post 'accept', to: 'water_bill_payments#accept'
-            get 'generate_invoice_pdf', to: 'water_bill_payments#generate_invoice_pdf'
+            get 'generate_invoice_pdf', on: :member
           end
         end
       end
