@@ -39,7 +39,7 @@ module Api
       private
   
       def building_params
-        params.require(:building).permit(:building_name, :building_address, :total_blocks, :number_of_floors, :ground_floor, :number_of_rooms_per_floor)
+        params.require(:building).permit(:building_name, :building_address, :total_blocks, :number_of_floors, :ground_floor, :number_of_rooms_per_floor, :starting_room_number)
       end
   
       def generate_blocks(building)
@@ -52,23 +52,22 @@ module Api
   
       def generate_floors(block, number_of_floors, number_of_rooms_per_floor)
         start_floor = block.building.ground_floor ? 0 : 1
-        current_room_number = 1
         
         (start_floor..number_of_floors).each do |floor_number|
           floor = block.floors.create(number: floor_number)
-          current_room_number = generate_rooms(floor, number_of_rooms_per_floor, current_room_number)
+          starting_room_number = (floor_number + 1) * 100 + 1
+          generate_rooms(floor, number_of_rooms_per_floor, starting_room_number)
         end
       end
       
       def generate_rooms(floor, number_of_rooms_per_floor, current_room_number)
         return unless number_of_rooms_per_floor
         
-        number_of_rooms_per_floor.times do
-          room = floor.rooms.create(room_number: current_room_number)
+        number_of_rooms_per_floor.times do |i|
+          room_number = current_room_number + i
+          room = floor.rooms.create(room_number: room_number)
           room.update(block_id: floor.block_id, floor_id: floor.id)
-          current_room_number += 1
         end
-        current_room_number
       end
     end
   end
