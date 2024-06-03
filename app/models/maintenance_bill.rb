@@ -1,6 +1,6 @@
 class MaintenanceBill < ApplicationRecord
   belongs_to :building
-  has_many :payments
+  has_many :payments, dependent: :destroy
 
   def payment_successful?
     payments.exists?(payment_status: "payment_successful")
