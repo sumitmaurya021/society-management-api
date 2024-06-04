@@ -27,7 +27,7 @@ Rails.application.routes.draw do
             post 'accept', to: 'payments#accept'
           end
         end
-        resources :water_bills, only: [:create, :update, :destroy, :index] do
+        resources :water_bills, only: [:create, :update, :destroy, :index, :show] do
           resources :water_bill_payments, only: [:create, :update, :destroy, :index, :show] do
             post 'accept', to: 'water_bill_payments#accept'
             get 'generate_invoice_pdf', on: :member

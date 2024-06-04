@@ -11,6 +11,11 @@ module Api
           render json: { water_bills: water_bills, message: 'This is list of all water bills' }, status: :ok
         end
 
+        def show
+          @water_bill = WaterBill.find(params[:id])
+          render json: @water_bill
+        end
+
         def get_water_bills
           if current_user.status == "accepted" || current_user.role == "admin"
             @water_bill = WaterBill.all
