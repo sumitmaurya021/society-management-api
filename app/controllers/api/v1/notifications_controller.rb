@@ -3,6 +3,7 @@ module Api
     class NotificationsController < ApplicationController
       before_action :doorkeeper_authorize!
       before_action :authorize_admin!, only: [:create]
+      before_action :set_notification, only: [:show, :update, :destroy]
 
       def index
         @notifications = Notification.all
@@ -10,8 +11,7 @@ module Api
       end
 
       def show
-        @notification = current_user.notifications.find(params[:id])
-        render json: @notification
+        render json: { notification: @notification, message: 'Notification retrieved successfully' }, status: :ok
       end
 
       def create
@@ -24,7 +24,24 @@ module Api
         end
       end
 
+      def update
+        if @notification.update(notification_params)
+          render json: { message: 'Notification updated successfully' }, status: :ok
+        else
+          render json: { errors: @notification.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def destroy
+        @notification.destroy
+        render json: { message: 'Notification deleted successfully' }, status: :ok
+      end
+
       private
+
+      def set_notification
+        @notification = Notification.find(params[:id])
+      end
 
       def notification_params
         params.require(:notification).permit(:title, :message, :user_id)

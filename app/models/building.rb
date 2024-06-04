@@ -1,7 +1,6 @@
 class Building < ApplicationRecord
   belongs_to :user
   has_many :blocks, dependent: :destroy
-  accepts_nested_attributes_for :blocks
 
   attr_accessor :total_blocks
   attr_accessor :ground_floor
