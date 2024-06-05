@@ -51,7 +51,7 @@ module Api
       end
   
       def building_params
-        params.require(:building).permit(:building_name, :building_address, :total_blocks, :number_of_floors, :ground_floor, :number_of_rooms_per_floor)
+        params.require(:building).permit(:building_name, :building_address, :total_blocks, :number_of_floors, :ground_floor, :number_of_rooms_per_floor, :starting_room_number)
       end
   
       def generate_blocks(building)
