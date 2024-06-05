@@ -71,8 +71,6 @@ module Api
   
           if @payment.update(status: "Paid")
             
-            binding.pry
-            
             PaymentMailer.payment_accepted_email(@payment).deliver_now
             render json: { message: "Payment accepted successfully", payment: @payment }, status: :ok
           else
