@@ -45,7 +45,6 @@ module Api
         
           water_bill = WaterBill.find(params[:water_bill_id])
           unit_rate = water_bill.unit_rate.to_f
-          previous_unit = params[:water_bill][:previous_unit].to_f
         
           total_units = 0
         
@@ -54,21 +53,29 @@ module Api
             next unless room
         
             current_unit = current_unit.to_f
-            difference = current_unit + previous_unit
-            units_consumed = difference * unit_rate
+            previous_unit = room.previous_unit.to_f
         
+            # Calculate the units consumed
+            units_consumed = current_unit * unit_rate
+        
+            # Update the room's total units
             room.total_units ||= 0
             room.total_units += units_consumed
         
-            room.update(unit_rate: unit_rate, previous_unit: previous_unit, updated_unit: current_unit, current_unit: 0)
-        
-            room.save
+            # Update the room's unit values
+            room.update(
+              unit_rate: unit_rate,
+              previous_unit: current_unit, # Set current unit as previous unit for next update
+              updated_unit: current_unit,
+              current_unit: 0 # Reset current unit
+            )
         
             total_units += room.total_units
           end
         
           render json: { message: "Units updated successfully", total_units: total_units }, status: :ok
         end
+        
         
 
 

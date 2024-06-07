@@ -54,6 +54,11 @@ module Api
             render json: { error: payment.errors.full_messages }, status: :unprocessable_entity
           end
         end
+
+        def user
+          @user = User.find_by(id: params[:user_id])
+          render json: { user: @user, message: "This is the user" }, status: :ok
+        end
   
         def accept
           payment_id = params[:payment_id]
