@@ -9,7 +9,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :users, only: [:index, :show, :update, :destroy] do
+      resources :users do
         resources :notifications
       end
       resources :buildings do

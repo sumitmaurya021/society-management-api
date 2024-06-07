@@ -202,6 +202,7 @@ module Api
         end
       end
 
+      # Accept user
       def accept_user
         user = User.find_by(id: params[:id])
         return render_unauthorized_response('User not found') unless user
