@@ -20,6 +20,8 @@ class User < ApplicationRecord
   has_many :payments, dependent: :destroy
   has_many :water_bill_payments, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  attr_accessor :block_name, :floor_number
+  before_validation :assign_block_floor_and_room, if: :customer?
 
   def self.authenticate(email, password)
     user = User.find_for_authentication(email: email)
@@ -36,6 +38,21 @@ class User < ApplicationRecord
   scope :regular, -> { where(role: 'customer') }
 
   private
+
+  def assign_block_floor_and_room
+    block = Block.find_by(block_name: block_name)
+    floor = block.floors.find_by(floor_number: floor_number) if block
+    room = floor.rooms.find_by(room_number: room_number) if floor
+
+    if block && floor && room
+      self.block = block
+      self.floor = floor
+      self.room = room
+    else
+      errors.add(:base, "Invalid block, floor, or room details")
+    end
+  end
+
 
   # Generate OTP
   def generate_otp

@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_27_090856) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_10_054156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "blocks", force: :cascade do |t|
-    t.string "name"
+    t.string "block_name"
     t.bigint "building_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -32,7 +32,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_27_090856) do
   end
 
   create_table "floors", force: :cascade do |t|
-    t.integer "number"
+    t.integer "floor_number"
     t.bigint "block_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

@@ -71,10 +71,15 @@ module Api
             )
         
             total_units += room.total_units
+        
+            # Find the related water bill payments for the room and update their status to pending
+            water_bill_payments = water_bill.water_bill_payments.where(room_number: room.room_number, floor: room.floor_id, block: room.block_id.to_s, status: :Paid)
+            water_bill_payments.update_all(status: :pending)
           end
         
           render json: { message: "Units updated successfully", total_units: total_units }, status: :ok
         end
+        
         
         
 
