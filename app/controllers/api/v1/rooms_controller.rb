@@ -20,7 +20,7 @@ module Api
 
             def show
                 @room = Room.find(params[:id])
-                render json: @room, status: :ok
+                render json: { room: @room, message: 'Room Find With Specific Id' }, status: :ok
             end
         end
     end
