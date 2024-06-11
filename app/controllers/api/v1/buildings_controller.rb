@@ -57,7 +57,7 @@ module Api
       def generate_blocks(building)
         building.total_blocks.times do |block_number|
           block_name = ("A".ord + block_number).chr
-          block = building.blocks.create(name: block_name)
+          block = building.blocks.create(block_name: block_name)
           generate_floors(block, building.number_of_floors, building.number_of_rooms_per_floor, building.ground_floor)
         end
       end
@@ -66,7 +66,7 @@ module Api
         start_floor = ground_floor ? 0 : 1
         
         (start_floor..number_of_floors).each do |floor_number|
-          floor = block.floors.create(number: floor_number)
+          floor = block.floors.create(floor_number: floor_number)
           starting_room_number = ground_floor && floor_number == 0 ? 1 : (floor_number * 100 + 1)
           generate_rooms(floor, number_of_rooms_per_floor, starting_room_number, ground_floor && floor_number == 0)
         end

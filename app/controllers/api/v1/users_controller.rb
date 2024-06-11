@@ -19,8 +19,8 @@ module Api
               updated_at: user.updated_at,
               otp: user.otp,
               mobile_number: user.mobile_number,
-              block: Block.find(user.block_id).name,
-              floor: Floor.find(user.floor_id).number,
+              block: Block.find(user.block_id).block_name,
+              floor: Floor.find(user.floor_id).floor_number,
               room: Room.find(user.room_id).room_number,
               floor_id: user.floor_id,
               room_number: user.room_number,
@@ -84,6 +84,7 @@ module Api
 
       # User login via email and password and Send OTP for verification
       def login
+        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
         user = User.find_by(email: params[:user][:email])
       
         if user&.valid_password?(params[:user][:password])
@@ -91,6 +92,7 @@ module Api
           otp = generate_otp
           send_otp_email(user, otp)
           render json: { message: 'OTP sent to your email. Please enter it.', email: user.email }, status: :ok
+          User.set_callback(:validation, :before, :assign_block_floor_and_room)
         else
           render_unauthorized_response('Invalid email or password')
         end
@@ -178,7 +180,7 @@ module Api
         password = params[:user][:password]
       
         # Find block by name
-        block = Block.find_by(name: block_name)
+        block = Block.find_by(block_name: block_name)
         return render_unauthorized_response('Invalid block name') unless block
         
         # Find user by block and room number
@@ -206,11 +208,16 @@ module Api
       def accept_user
         user = User.find_by(id: params[:id])
         return render_unauthorized_response('User not found') unless user
-        return render_unauthorized_response('User is already accepted') if user.status == 'success'
+        return render_unauthorized_response('User is already accepted') if user.status == 'accepted'
 
-        user.update(status: 'accepted')
+        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
+
+        user.update!(status: 'accepted')
         UserMailer.accept_user_email(user).deliver_now
         render json: { message: 'User accepted successfully', user: user }, status: :ok
+
+        User.set_callback(:validation, :before, :assign_block_floor_and_room)
+
       end
 
       # Reject user
@@ -219,9 +226,14 @@ module Api
         return render_unauthorized_response('User not found') unless user
         return render_unauthorized_response('User is already rejected') if user.status == 'rejected'
 
+        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
+
         user.update(status: 'rejected')
         UserMailer.reject_user_email(user).deliver_now
         render json: { message: 'User rejected successfully', user: user }, status: :ok
+
+        User.set_callback(:validation, :before, :assign_block_floor_and_room)
+        
       end
 
       def update
@@ -242,8 +254,7 @@ module Api
         if params[:user][:role] == 'admin'
           params.require(:user).permit(:email, :password, :name, :role, :otp)
         else
-          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :owner_or_renter, :room_id, :block_id, :floor_id, :room_number, :gender)
-          
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :block_name, :floor_number, :room_number, :owner_or_renter, :gender)          
         end
       end
 
