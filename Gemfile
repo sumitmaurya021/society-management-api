@@ -7,6 +7,7 @@ gem 'pry-rails'
 gem 'razorpay'
 gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary'
+gem 'prawn'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.3", ">= 7.1.3.2"

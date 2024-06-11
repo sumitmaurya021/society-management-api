@@ -23,8 +23,9 @@ Rails.application.routes.draw do
         get 'maintenance_bills', to: 'buildings#maintenance_bills'
         get 'water_bills', to: 'buildings#water_bills'
         resources :maintenance_bills do
-          resources :payments, only: [:create, :update, :destroy, :index] do
+          resources :payments, only: [:create, :update, :destroy, :index, :show] do
             post 'accept', to: 'payments#accept'
+            get 'generate_invoice_pdf', on: :member, defaults: { format: :pdf }
           end
         end
         resources :water_bills, only: [:create, :update, :destroy, :index, :show] do

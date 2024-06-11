@@ -84,7 +84,7 @@ module Api
 
       # User login via email and password and Send OTP for verification
       def login
-        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
+        # User.skip_callback(:validation, :before, :assign_block_floor_and_room)
         user = User.find_by(email: params[:user][:email])
       
         if user&.valid_password?(params[:user][:password])
@@ -92,7 +92,7 @@ module Api
           otp = generate_otp
           send_otp_email(user, otp)
           render json: { message: 'OTP sent to your email. Please enter it.', email: user.email }, status: :ok
-          User.set_callback(:validation, :before, :assign_block_floor_and_room)
+          # User.set_callback(:validation, :before, :assign_block_floor_and_room)
         else
           render_unauthorized_response('Invalid email or password')
         end
@@ -309,7 +309,8 @@ module Api
             owner_or_renter: user.owner_or_renter,
             room_id: user.room_id,
             block_id: user.block_id,
-            # block_name: block_name,
+            block_name: user.block.block_name,
+            floor_number: user.floor.floor_number,
             floor_id: user.floor_id,
             room_number: user.room_number,
             status: user.status,
