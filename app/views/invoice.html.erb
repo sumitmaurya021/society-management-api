@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice</title>
+  <!-- Include any necessary CSS styles here -->
+  <style>
+    /* Define your CSS styles for the invoice here */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .invoice-header {
+      background-color: #f0f0f0;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    .invoice-details {
+      margin-bottom: 20px;
+    }
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .invoice-table th, .invoice-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .invoice-table th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-header">
+    <h1>Invoice</h1>
+    <!-- Add any header information here -->
+  </div>
+
+  <div class="invoice-details">
+    <p><strong>Payment ID:</strong> <%= @payment.id %></p>
+    <p><strong>Month/Year:</strong> <%= @payment.month_year %></p>
+    <!-- Add more payment details as needed -->
+  </div>
+
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Description</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Iterate over payment items or details and render them in table rows -->
+      <tr>
+        <td>Item 1</td>
+        <td>Description of item 1</td>
+        <td>$100.00</td>
+      </tr>
+      <tr>
+        <td>Item 2</td>
+        <td>Description of item 2</td>
+        <td>$50.00</td>
+      </tr>
+      <!-- Add more rows as needed -->
+    </tbody>
+  </table>
+
+  <!-- Add any additional content or sections here -->
+
+</body>
+</html>

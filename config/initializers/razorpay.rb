@@ -1,0 +1,1 @@
+Razorpay.setup('your_api_key', 'your_api_secret')

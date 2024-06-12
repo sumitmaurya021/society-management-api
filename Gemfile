@@ -8,6 +8,9 @@ gem 'razorpay'
 gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary'
 gem 'prawn'
+gem 'pdfkit'
+gem 'render_anywhere'
+gem 'grover'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.3", ">= 7.1.3.2"

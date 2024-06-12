@@ -28,6 +28,7 @@ module Api
             end
           end
         end
+        
 
         def index
           maintenance_bill_payments = @maintenance_bill.payments.includes(:user => [:block, :floor, :room])
