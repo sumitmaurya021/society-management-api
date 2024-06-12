@@ -3,12 +3,16 @@ module Api
     module V1
       class MaintenanceBillsController < ApplicationController
         before_action :doorkeeper_authorize!
-        before_action :set_maintenance_bill, only: [:update , :destroy]
+        before_action :set_maintenance_bill, only: [:update , :destroy, :show]
 
         def index
           building = current_user.buildings.find(params[:building_id])
           maintenance_bills = building.maintenance_bills
           render json: { water_bills: maintenance_bills, message: 'This is list of all maintenance bills' }, status: :ok
+        end
+
+        def show
+          render json: @maintenance_bill, status: :ok
         end
 
         def get_maintenance_bills

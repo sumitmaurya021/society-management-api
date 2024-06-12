@@ -1,4 +1,3 @@
-require 'wicked_pdf'
 # WickedPDF Global Configuration
 #
 # Use this to set up shared configuration options for your entire application.
@@ -12,9 +11,8 @@ require 'wicked_pdf'
 WickedPdf.configure do |config|
   # Path to the wkhtmltopdf executable: This usually isn't needed if using
   # one of the wkhtmltopdf-binary family of gems.
-  # exe_path: 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe', # Update the path as necessary
-  # layout: 'pdf.html', # Ensure you have a layout file named `pdf.html.erb`
-  # dpi: 300
+  # config.exe_path = '/usr/local/bin/wkhtmltopdf',
+  # config.enable_local_file_access = true
   #   or
   # config.exe_path = Gem.bin_path('wkhtmltopdf-binary', 'wkhtmltopdf')
 

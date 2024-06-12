@@ -49,7 +49,7 @@ module Api
       def block_info(block)
         {
           id: block.id,
-          name: block.name,
+          name: block.block_name,
           floors_count: block.floors.count,
           floors: block.floors.map { |floor| floor_info(floor) }
         }
@@ -58,7 +58,7 @@ module Api
       def floor_info(floor)
         {
           id: floor.id,
-          number: floor.number,
+          number: floor.floor_number,
           rooms_count: floor.rooms.count,
           rooms: floor.rooms.map { |room| room_info(room) }
         }

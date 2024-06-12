@@ -1,16 +1,67 @@
-# app/controllers/api/v1/payments_controller.rb
 module Api
     module V1
       class PaymentsController < ApplicationController
-        before_action :doorkeeper_authorize! 
+        before_action :doorkeeper_authorize!, only: [:index] 
         before_action :set_building
         before_action :set_maintenance_bill
-        before_action :set_payment, only: [:update, :destroy, :accept]
+        before_action :set_payment, only: [:update, :destroy, :accept, :generate_invoice_pdf]
+
+        def generate_invoice_pdf
+          respond_to do |format|
+            format.pdf do
+              pdf = Prawn::Document.new
+              pdf.text "Maintenance Bill Payment Invoice", size: 30, style: :bold
+              pdf.move_down 20
+              pdf.text "Payment ID: #{@payment.id}", size: 15
+              pdf.text "Month/Year: #{@payment.month_year}", size: 15
+              pdf.text "Bill Name: #{@payment.bill_name}", size: 15
+              pdf.text "Block: #{@payment.user.block.block_name}", size: 15
+              pdf.text "Floor: #{@payment.user.floor.floor_number}", size: 15
+              pdf.text "Room: #{@payment.user.room.room_number}", size: 15
+              pdf.text "Amount: #{@payment.amount}", size: 15
+              pdf.text "Payment Method: #{@payment.payment_method}", size: 15
+              pdf.text "Status: #{@payment.status}", size: 15
+              pdf.text "Created At: #{@payment.created_at}", size: 15
+              pdf.text "Updated At: #{@payment.updated_at}", size: 15
+  
+              send_data pdf.render, filename: "invoice_#{@payment.id}.pdf", type: 'application/pdf', disposition: 'inline'
+            end
+          end
+        end
 
         def index
-          @payments = @maintenance_bill.payments
-          render json: { payments: @payments, message: 'This is list of all payments' }, status: :ok
+          maintenance_bill_payments = @maintenance_bill.payments.includes(:user => [:block, :floor, :room])
+          
+          detailed_payments = maintenance_bill_payments.map do |payment|
+            {
+              id: payment.id,
+              month_year: payment.month_year,
+              bill_name: payment.bill_name,
+              block_name: payment.user.block.block_name,
+              floor_number: payment.user.floor.floor_number,
+              room_number: payment.user.room.room_number,
+              amount: payment.amount,
+              payment_method: payment.payment_method,
+              user_id: payment.user_id,
+              maintenance_bill_id: payment.maintenance_bill_id,
+              status: payment.status,
+              created_at: payment.created_at,
+              updated_at: payment.updated_at
+            }
+          end
+        
+          render json: { maintenance_bill_payments: detailed_payments }, status: :ok
         end
+
+        def show
+          @payment = @maintenance_bill.payments.find_by(id: params[:id])
+          if @payment
+            render json: @payment, status: :ok
+          else
+            render json: { error: "Payment not found" }, status: :not_found
+          end
+        end
+        
 
         def create
           payment = @maintenance_bill.payments.new(payment_params)
@@ -77,7 +128,7 @@ module Api
         def set_payment
           return unless @maintenance_bill
   
-          @payment = @maintenance_bill.payments.find_by(id: params[:payment_id])
+          @payment = @maintenance_bill.payments.find_by(id: params[:id])
           render json: { error: "Payment not found" }, status: :not_found unless @payment
         end
   
