@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PDF Layout</title>
+  <!-- Include any necessary CSS styles here -->
+  <style>
+    /* Define your CSS styles for the PDF layout here */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    /* Add any additional styles as needed */
+  </style>
+</head>
+<body>
+  <!-- Add any header content here -->
+  <header>
+    <h1>Your PDF Header</h1>
+    <!-- Add any header elements you need -->
+  </header>
+
+  <!-- Main content area -->
+  <main>
+    <%= yield %>
+    <!-- This will render the content of your invoice template -->
+  </main>
+
+  <!-- Add any footer content here -->
+  <footer>
+    <p>Your PDF Footer</p>
+    <!-- Add any footer elements you need -->
+  </footer>
+</body>
+</html>

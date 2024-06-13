@@ -296,30 +296,30 @@ module Api
         render json: { error: message }, status: :unauthorized
       end
 
-      # Render login response
       def render_login_response(user, access_token, message)
-        # block_name = Block.find(user.block_id).name
-        render json: {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            mobile_number: user.mobile_number,
-            owner_or_renter: user.owner_or_renter,
-            room_id: user.room_id,
-            block_id: user.block_id,
-            block_name: user.block.block_name,
-            floor_number: user.floor.floor_number,
-            floor_id: user.floor_id,
-            room_number: user.room_number,
-            status: user.status,
-            gender: user.gender,
-            created_at: access_token.created_at.to_time.to_i,
-            access_token: access_token.token,
-          },
-          message: message
-        }, status: :ok
+        # Initialize the user data hash
+        user_data = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          mobile_number: user.mobile_number,
+          owner_or_renter: user.owner_or_renter,
+          room_id: user.room_id,
+          block_id: user.block_id,
+          floor_id: user.floor_id,
+          room_number: user.room_number,
+          status: user.status,
+          gender: user.gender,
+          created_at: access_token.created_at.to_time.to_i,
+          access_token: access_token.token
+        }
+      
+        unless user.role == 'admin'
+          user_data[:block_name] = user.block.block_name if user.block.present?
+          user_data[:floor_number] = user.floor.floor_number if user.floor.present?
+        end
+        render json: { user: user_data, message: message }, status: :ok
       end
 
       # Render user response
