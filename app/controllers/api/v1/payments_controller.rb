@@ -4,9 +4,10 @@ module Api
         before_action :doorkeeper_authorize!, only: [:index] 
         before_action :set_building
         before_action :set_maintenance_bill
-        before_action :set_payment, only: [:update, :destroy, :accept, :generate_invoice_pdf]
+        before_action :set_payment, only: [:update, :destroy, :accept]
 
         def generate_invoice_pdf
+          @payment = @maintenance_bill.payments.find_by(id: params[:id])
           respond_to do |format|
             format.pdf do
               pdf = Prawn::Document.new
@@ -127,9 +128,10 @@ module Api
         end
   
         def set_payment
+          
           return unless @maintenance_bill
   
-          @payment = @maintenance_bill.payments.find_by(id: params[:id])
+          @payment = @maintenance_bill.payments.find_by(id: params[:payment_id])
           render json: { error: "Payment not found" }, status: :not_found unless @payment
         end
   

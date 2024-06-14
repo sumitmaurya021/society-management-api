@@ -17,6 +17,7 @@ Rails.application.routes.draw do
           resources :floors do
             resources :rooms do
               post 'update_units', to: 'water_bills#update_units'
+              resources :vehicles
             end
           end
         end

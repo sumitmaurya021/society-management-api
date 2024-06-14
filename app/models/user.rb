@@ -20,6 +20,7 @@ class User < ApplicationRecord
   has_many :payments, dependent: :destroy
   has_many :water_bill_payments, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :vehicles, dependent: :destroy
   attr_accessor :block_name, :floor_number
   before_validation :assign_block_floor_and_room, if: :customer?
 
