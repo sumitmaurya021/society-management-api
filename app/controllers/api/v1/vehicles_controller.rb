@@ -2,8 +2,8 @@
 module Api
     module V1
       class VehiclesController < ApplicationController
-        before_action :doorkeeper_authorize!
-  
+        before_action :doorkeeper_authorize!, only: [:get_all_vehicles]
+
         def index
           @room = Room.find(params[:room_id])
           @vehicles = @room.vehicles.map do |vehicle|
@@ -25,23 +25,44 @@ module Api
               updated_at: vehicle.updated_at
             }
           end
-  
+
           render json: { vehicles: @vehicles, message: 'Room Vehicles' }, status: :ok
         end
-  
-        def show    
+
+        def get_all_vehicles
+          @vehicles = Vehicle.all.map do |vehicle|
+            {
+              id: vehicle.id,
+              total_no_of_two_wheeler: vehicle.total_no_of_two_wheeler,
+              total_no_of_four_wheeler: vehicle.total_no_of_four_wheeler,
+              two_wheeler_numbers: vehicle.two_wheeler_numbers,
+              four_wheeler_numbers: vehicle.four_wheeler_numbers,
+              name: vehicle.user.name,
+              email: vehicle.user.email,
+              mobile_number: vehicle.user.mobile_number,
+              floor_number: vehicle.user.floor.floor_number,
+              block_name: vehicle.user.block.block_name,
+              room_number: vehicle.user.room.room_number,
+              created_at: vehicle.created_at,
+              updated_at: vehicle.updated_at
+            }
+          end
+          render json: { vehicles: @vehicles, message: 'All Vehicles' }, status: :ok
+        end
+
+        def show
           @room = Room.find(params[:room_id])
           @vehicle = @room.vehicles.find(params[:id])
           render json: { vehicle: @vehicle, message: 'Room Vehicle' }, status: :ok
         end
-  
+
         def create
           @room = Room.find(params[:room_id])
           @vehicle = @room.vehicles.build(vehicle_params)
           @vehicle.user_id = current_user.id
-          
+
           if @vehicle.save
-            render json: { 
+            render json: {
               id: @vehicle.id,
               total_no_of_two_wheeler: @vehicle.total_no_of_two_wheeler,
               total_no_of_four_wheeler: @vehicle.total_no_of_four_wheeler,
@@ -56,9 +77,18 @@ module Api
             render json: { errors: @vehicle.errors.full_messages }, status: :unprocessable_entity
           end
         end
-  
+
+        def update
+          @vehicle = Vehicle.find(params[:id])
+          if @vehicle.update(vehicle_params)
+            render json: { message: 'Vehicle updated successfully' }, status: :ok
+          else
+            render json: { error: @vehicle.errors.full_messages }, status: :unprocessable_entity
+          end
+        end
+
         private
-  
+
         def vehicle_params
           params.require(:vehicle).permit(
             :total_no_of_two_wheeler,
@@ -70,4 +100,3 @@ module Api
       end
     end
   end
-  

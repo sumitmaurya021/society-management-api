@@ -13,6 +13,7 @@ Rails.application.routes.draw do
         resources :notifications
       end
       resources :buildings do
+      get 'maintenance_bill_summary', to: 'dashboards#maintenance_bill_summary'
         resources :blocks do
           resources :floors do
             resources :rooms do
@@ -53,6 +54,7 @@ Rails.application.routes.draw do
       post 'forgot_password_for_customer', to: 'users#forgot_password_for_customer'
       post 'accept_user', to: 'users#accept_user'
       post 'reject_user', to: 'users#reject_user'
+      get 'get_all_vehicles', to: 'vehicles#get_all_vehicles'
     end
   end
 end
