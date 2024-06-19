@@ -3,13 +3,13 @@ module Api
   module V1
     class UsersController < ApplicationController
       # Skip authentication for certain actions
-      skip_before_action :doorkeeper_authorize!, only: %i[index create login logout verify_otp_and_login forgot_password reset_password login_by_customer reset_password_for_customer forgot_password_for_customer] 
+      skip_before_action :doorkeeper_authorize!, only: %i[index create login logout verify_otp_and_login forgot_password reset_password login_by_customer reset_password_for_customer forgot_password_for_customer]
 
 
       # show only customer user list
       def index
         if current_user.role == 'admin'
-          @users = User.where(role: 'customer').map do |user|
+          @users = User.includes(:block, :floor, :room).where(role: ['customer', 'admin']).map do |user|
             {
               id: user.id,
               email: user.email,
@@ -19,9 +19,9 @@ module Api
               updated_at: user.updated_at,
               otp: user.otp,
               mobile_number: user.mobile_number,
-              block: Block.find(user.block_id).block_name,
-              floor: Floor.find(user.floor_id).floor_number,
-              room: Room.find(user.room_id).room_number,
+              block: user.block&.block_name,
+              floor: user.floor&.floor_number,
+              room: user.room&.room_number,
               floor_id: user.floor_id,
               room_number: user.room_number,
               owner_or_renter: user.owner_or_renter,
@@ -36,7 +36,7 @@ module Api
           render json: { error: 'You are not authorized to access this resource' }, status: :unauthorized
         end
       end
-      
+
       def update
         if @user.update(user_params)
           render json: { message: 'User updated successfully' }, status: :ok
@@ -86,7 +86,7 @@ module Api
       def login
         # User.skip_callback(:validation, :before, :assign_block_floor_and_room)
         user = User.find_by(email: params[:user][:email])
-      
+
         if user&.valid_password?(params[:user][:password])
           # Generate OTP and send to user's email
           otp = generate_otp
@@ -98,13 +98,13 @@ module Api
         end
       end
 
-      # Verify OTP and login 
+      # Verify OTP and login
       def verify_otp_and_login
         email = params[:user][:email]
         otp = params[:user][:otp]
-      
+
         user = User.find_by(email: email)
-      
+
         if user && user.otp == otp
           user.update(otp: nil) # Clear OTP
           client_app = Doorkeeper::Application.find_by(uid: params[:client_id])
@@ -117,7 +117,7 @@ module Api
 
       def forgot_password
         user = User.find_by(email: params[:email])
-    
+
         if user
           otp = generate_otp
           user.update(otp: otp)
@@ -141,13 +141,13 @@ module Api
       end
 
       def reset_password
-        
+
         email = params[:user][:email]
         otp = params[:user][:otp]
         password = params[:password]
-      
+
         user = User.find_by(email: email)
-      
+
         if user && (user.otp.nil? || user.otp == otp)
           user.update(password: password, otp: nil)
           render json: { message: 'Password reset successful' }, status: :ok
@@ -172,26 +172,26 @@ module Api
           render_unauthorized_response('Invalid OTP')
         end
       end
-      
+
 
       def login_by_customer
         block_name = params[:user][:block_name]
         room_number = params[:user][:room_number]
         password = params[:user][:password]
-      
+
         # Find block by name
         block = Block.find_by(block_name: block_name)
         return render_unauthorized_response('Invalid block name') unless block
-        
+
         # Find user by block and room number
         user = User.find_by(block_id: block.id, room_number: room_number)
-      
+
         if user
           if user.valid_password?(password)
             # Generate access token
             client_app = Doorkeeper::Application.find_by(uid: params[:client_id])
             access_token = create_access_token(user, client_app)
-            
+
             # Render successful response
             render_login_response(user, access_token, 'Login successful')
           else
@@ -233,7 +233,7 @@ module Api
         render json: { message: 'User rejected successfully', user: user }, status: :ok
 
         User.set_callback(:validation, :before, :assign_block_floor_and_room)
-        
+
       end
 
       def update
@@ -245,8 +245,8 @@ module Api
         end
       end
 
-  
-      
+
+
       private
 
       # Strong parameters for user
@@ -254,7 +254,7 @@ module Api
         if params[:user][:role] == 'admin'
           params.require(:user).permit(:email, :password, :name, :role, :otp)
         else
-          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :block_name, :floor_number, :room_number, :owner_or_renter, :gender)          
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :block_name, :floor_number, :room_number, :owner_or_renter, :gender)
         end
       end
 
@@ -314,7 +314,7 @@ module Api
           created_at: access_token.created_at.to_time.to_i,
           access_token: access_token.token
         }
-      
+
         unless user.role == 'admin'
           user_data[:block_name] = user.block.block_name if user.block.present?
           user_data[:floor_number] = user.floor.floor_number if user.floor.present?
@@ -330,6 +330,9 @@ module Api
             name: user.name,
             email: user.email,
             role: user.role,
+            block_id: user.block_id,
+            floor_id: user.floor_id,
+            room_id: user.room_id,
             created_at: access_token.created_at.to_time.to_i,
             access_token: access_token.token
           }

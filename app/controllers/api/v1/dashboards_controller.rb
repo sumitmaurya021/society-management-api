@@ -2,7 +2,7 @@
 module Api
   module V1
     class DashboardsController < ApplicationController
-      before_action :doorkeeper_authorize! 
+      before_action :doorkeeper_authorize!
 
       def index
         users = User.all.includes(:buildings)
@@ -21,6 +21,37 @@ module Api
         }
 
         render json: dashboard_info, status: :ok
+      end
+
+      def maintenance_bill_summary
+        buildings = Building.includes(blocks: { floors: :rooms })
+
+        summary = buildings.map do |building|
+          total_owner_amount = 0
+          total_rent_amount = 0
+          total_payments_received = 0
+
+          building.blocks.each do |block|
+            block.floors.each do |floor|
+              total_owner_amount += floor.rooms.count * building.maintenance_bills.sum(:owner_amount)
+              total_rent_amount += floor.rooms.count * building.maintenance_bills.sum(:rent_amount)
+            end
+          end
+
+          total_amount = total_owner_amount + total_rent_amount
+          total_payments_received = building.maintenance_bills.joins(:payments).where(payments: { status: :paid }).sum(:amount)
+          remaining_payments = total_amount - total_payments_received
+
+          {
+            building_id: building.id,
+            building_name: building.building_name,
+            total_amount: total_amount,
+            total_payments_received: total_payments_received,
+            remaining_payments: remaining_payments
+          }
+        end
+
+        render json: { maintenance_bill_summary: summary }, status: :ok
       end
 
       private

@@ -23,7 +23,7 @@ module Api
             render json: { error: "Only accepted users can view maintenance bills" }, status: :forbidden
           end
         end
-        
+
         def create
           building = current_user.buildings.find(params[:building_id])
           maintenance_bill = building.maintenance_bills.new(maintenance_bill_params)
@@ -59,4 +59,3 @@ module Api
       end
     end
   end
-  

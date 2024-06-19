@@ -1,7 +1,7 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
-  config.action_cable.url = "ws://localhost:3000/cable" 
+  config.action_cable.url = "ws://localhost:3000/cable"
   config.action_cable.allowed_request_origins = [ 'http://localhost:3000', /http:\/\/localhost.*/ ]
 
   # Settings specified here will take precedence over those in config/application.rb.
@@ -83,7 +83,6 @@ Rails.application.configure do
     authentication: "plain",
     enable_starttls_auto: true,
     user_name: "mauryasumit222@gmail.com",
-    password: "cnxxgxhptumsnnzd"
+    password: "gtfhmjsejpptqvcv"
   }
 end
-
