@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_14_122537) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_19_121628) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -136,6 +136,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_122537) do
     t.index ["floor_id"], name: "index_rooms_on_floor_id"
   end
 
+  create_table "shops", force: :cascade do |t|
+    t.string "shop_name"
+    t.bigint "block_id", null: false
+    t.bigint "floor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["block_id"], name: "index_shops_on_block_id"
+    t.index ["floor_id"], name: "index_shops_on_floor_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -215,6 +225,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_122537) do
   add_foreign_key "payments", "maintenance_bills"
   add_foreign_key "rooms", "blocks"
   add_foreign_key "rooms", "floors"
+  add_foreign_key "shops", "blocks"
+  add_foreign_key "shops", "floors"
   add_foreign_key "users", "blocks"
   add_foreign_key "users", "floors"
   add_foreign_key "vehicles", "rooms"
