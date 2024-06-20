@@ -20,7 +20,6 @@ Rails.application.routes.draw do
               post 'update_units', to: 'water_bills#update_units'
               resources :vehicles
             end
-            resources :shops, only: [:index, :show, :create]
           end
         end
         get 'maintenance_bills', to: 'buildings#maintenance_bills'
