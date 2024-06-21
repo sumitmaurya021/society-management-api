@@ -234,13 +234,19 @@ module Api
         return render_unauthorized_response('User not found') unless user
         return render_unauthorized_response('User is already rejected') if user.status == 'rejected'
 
-        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
-
-        user.update(status: 'rejected')
-        UserMailer.reject_user_email(user).deliver_now
-        render json: { message: 'User rejected successfully', user: user }, status: :ok
-
-        User.set_callback(:validation, :before, :assign_block_floor_and_room)
+        if user.role == 'shop'
+          user.update_column(:status, 'rejected') # Skips validations and callbacks
+          render json: { message: 'User accepted successfully', user: user }, status: :ok
+        else
+          user.skip_block_floor_assignment = true
+          if user.save(validate: false)
+            user.update_column(:status, 'rejected')
+            UserMailer.accept_user_email(user).deliver_now
+            render json: { message: 'User accepted successfully', user: user }, status: :ok
+          else
+            render json: { error: user.errors.full_messages.to_sentence }, status: :unprocessable_entity
+          end
+        end
       end
 
       def update
