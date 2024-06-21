@@ -9,7 +9,7 @@ module Api
       # show only customer user list
       def index
         if current_user.role == 'admin'
-          @users = User.includes(:block, :floor, :room).where(role: ['customer', 'admin']).map do |user|
+          @users = User.includes(:block, :floor, :room).where(role: ['customer', 'admin', 'shop']).map do |user|
             {
               id: user.id,
               email: user.email,
@@ -28,7 +28,8 @@ module Api
               role: user.role,
               room_id: user.room_id,
               status: user.status,
-              gender: user.gender
+              gender: user.gender,
+              shop_number: user.shop_number
             }
           end
           render json: { users: @users, message: 'This is list of all users' }, status: :ok
@@ -105,7 +106,7 @@ module Api
 
         user = User.find_by(email: email)
 
-        if user && user.otp == otp
+        if user && (user.otp.nil? || user.otp == otp)
           user.update(otp: nil) # Clear OTP
           client_app = Doorkeeper::Application.find_by(uid: params[:client_id])
           access_token = create_access_token(user, client_app)
@@ -210,15 +211,22 @@ module Api
         return render_unauthorized_response('User not found') unless user
         return render_unauthorized_response('User is already accepted') if user.status == 'accepted'
 
-        User.skip_callback(:validation, :before, :assign_block_floor_and_room)
-
-        user.update!(status: 'accepted')
-        UserMailer.accept_user_email(user).deliver_now
-        render json: { message: 'User accepted successfully', user: user }, status: :ok
-
-        User.set_callback(:validation, :before, :assign_block_floor_and_room)
-
+        if user.role == 'shop'
+          user.update_column(:status, 'accepted') # Skips validations and callbacks
+          render json: { message: 'User accepted successfully', user: user }, status: :ok
+        else
+          user.skip_block_floor_assignment = true
+          if user.save(validate: false)
+            user.update_column(:status, 'accepted')
+            UserMailer.accept_user_email(user).deliver_now
+            render json: { message: 'User accepted successfully', user: user }, status: :ok
+          else
+            render json: { error: user.errors.full_messages.to_sentence }, status: :unprocessable_entity
+          end
+        end
       end
+
+
 
       # Reject user
       def reject_user
@@ -233,7 +241,6 @@ module Api
         render json: { message: 'User rejected successfully', user: user }, status: :ok
 
         User.set_callback(:validation, :before, :assign_block_floor_and_room)
-
       end
 
       def update
@@ -253,8 +260,10 @@ module Api
       def user_params
         if params[:user][:role] == 'admin'
           params.require(:user).permit(:email, :password, :name, :role, :otp)
+        elsif params[:user][:role] == 'shop'
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :shop_number, :block_name, :floor_number, :gender, :role).merge(owner_or_renter: nil)
         else
-          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :block_name, :floor_number, :room_number, :owner_or_renter, :gender)
+          params.require(:user).permit(:name, :email, :password, :otp, :mobile_number, :block_name, :floor_number, :room_number, :owner_or_renter, :gender, :role)
         end
       end
 
