@@ -1,3 +1,4 @@
+# app/models/user.rb
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
 
@@ -16,13 +17,14 @@ class User < ApplicationRecord
 
   attr_accessor :block_name, :floor_number, :room_number, :skip_block_floor_assignment
 
+  validate :validate_block_floor_room, unless: -> { role == 'admin' }
+  before_validation :assign_block_floor_and_room, unless: -> { role == 'admin' || skip_block_floor_assignment }
+
   validates :name, presence: true
   validates :email, presence: true
   validates :mobile_number, presence: true, if: :customer_or_shop?
   validates :block_name, :floor_number, presence: true, if: :residential_or_shop?
   validates :room_number, presence: true, if: :residential_user?
-
-  before_validation :assign_block_floor_and_room, unless: :skip_block_floor_assignment
 
   scope :admins, -> { where(role: 'admin') }
   scope :regular, -> { where(role: 'customer') }
@@ -40,6 +42,20 @@ class User < ApplicationRecord
   end
 
   private
+
+  def validate_block_floor_room
+    if block_name.blank?
+      errors.add(:block_name, "can't be blank")
+    end
+
+    if floor_number.blank?
+      errors.add(:floor_number, "can't be blank")
+    end
+
+    if room_number.blank?
+      errors.add(:room_number, "can't be blank")
+    end
+  end
 
   def residential_user?
     customer?
