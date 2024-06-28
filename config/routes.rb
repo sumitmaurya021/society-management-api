@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   mount ActionCable.server => '/cable'
+  mount GoodJob::Engine => 'good_job'
 
   devise_for :users
   use_doorkeeper do
