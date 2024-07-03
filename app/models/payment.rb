@@ -3,5 +3,5 @@ class Payment < ApplicationRecord
     belongs_to :maintenance_bill, optional: true
 
 
-    enum status: { pending: 0, paid: 1 }
+    enum status: { pending: 0, paid: 1, failed: 2 }
 end
