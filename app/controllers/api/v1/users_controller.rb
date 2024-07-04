@@ -1,9 +1,7 @@
-# app/controllers/api/v1/users_controller.rb
 module Api
   module V1
     class UsersController < ApplicationController
-      # Skip authentication for certain actions
-      skip_before_action :doorkeeper_authorize!, only: %i[index create login logout verify_otp_and_login forgot_password reset_password login_by_customer reset_password_for_customer forgot_password_for_customer]
+      skip_before_action :doorkeeper_authorize!, only: %i[index login create logout verify_otp_and_login forgot_password reset_password login_by_customer reset_password_for_customer forgot_password_for_customer credentials]
 
 
       # show only customer user list
@@ -248,6 +246,12 @@ module Api
         end
       end
 
+      def credentials
+        client_id = Doorkeeper::Application.last.uid
+        render json: { client_id: client_id, message: 'Client ID Fetched Successfully' }, status: :ok
+      end
+
+
 
 
       private
@@ -316,6 +320,8 @@ module Api
           room_number: user.room_number,
           status: user.status,
           gender: user.gender,
+          rent_amount: user.rent_amount,
+          owner_amount: user.owner_amount,
           created_at: access_token.created_at.to_time.to_i,
           access_token: access_token.token
         }

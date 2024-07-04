@@ -56,6 +56,7 @@ Rails.application.routes.draw do
       post 'accept_user', to: 'users#accept_user'
       post 'reject_user', to: 'users#reject_user'
       get 'get_all_vehicles', to: 'vehicles#get_all_vehicles'
+      get 'credentials', to: 'users#credentials'
     end
   end
 end

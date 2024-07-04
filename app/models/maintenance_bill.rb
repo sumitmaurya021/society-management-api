@@ -5,7 +5,11 @@ class MaintenanceBill < ApplicationRecord
   after_create :schedule_expiration_maintenance_bill_job
 
   def payment_successful?
-    payments.exists?(payment_status: "payment_successful")
+    payments.exists?(status: :paid)
+  end
+
+  def expired?
+    end_date < Date.current
   end
 
   private

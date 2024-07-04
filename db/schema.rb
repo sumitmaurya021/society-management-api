@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_28_114147) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_03_102826) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -247,6 +247,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_28_114147) do
     t.string "gender"
     t.string "shop_number"
     t.string "customer_type"
+    t.decimal "owner_amount", precision: 10, scale: 2
+    t.decimal "rent_amount", precision: 10, scale: 2
     t.index ["block_id"], name: "index_users_on_block_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["floor_id"], name: "index_users_on_floor_id"
